@@ -1,9 +1,16 @@
 {
   "general_settings": {
-    "game_title_ar": "NEO حروف"
+    "game_title_ar": "NEO حروف",
+    "developer_name": "اسم المطور هنا"
   },
   "security": {
     "test_code": "1111", 
     "enable_live_api_check": false
+  },
+  "game_play_settings": {
+    "number_of_hidden_letters_per_game": 5,
+    "points_easy": 10,
+    "points_medium": 20,
+    "points_hard": 30
   }
 }
