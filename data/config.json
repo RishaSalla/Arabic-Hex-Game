@@ -1,5 +1,9 @@
 {
-  "test_code": "11111111",
-  "hidden_letters": ["س", "ش", "ص", "ض"],
-  // ... إعدادات أخرى ...
+  "general_settings": {
+    "game_title_ar": "NEO حروف"
+  },
+  "security": {
+    "test_code": "1111", 
+    "enable_live_api_check": false
+  }
 }
