@@ -139,7 +139,6 @@ function buildHexGrid() {
             gridData.push(cellData);
 
             // 4. تفعيل حدث النقر (يرتبط بالدالة handleHexClick المعرفة أعلاه)
-            // نستخدم دالة السهم (arrow function) لضمان تمرير 'this' و 'cellData' بشكل صحيح.
             hexImage.on('pointerdown', () => {
                 handleHexClick.call(scene, cellData);
             });
@@ -223,7 +222,8 @@ function create() {
     // ===================================================
     // 4. استدعاء دالة بناء شبكة الهيكساجون (الآن)
     // ===================================================
-    buildHexGrid.call(this); // الاستدعاء الصحيح
+    // هذا هو السطر الذي يجعل الشبكة تظهر عند تحميل اللعبة
+    buildHexGrid.call(this); 
 
     console.log("Game Created. Scoreboard & Hex Grid Loaded.");
 }
