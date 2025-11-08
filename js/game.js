@@ -1,4 +1,4 @@
-// js/game.js
+// js/game.js - الكود 14 (الإصلاح النهائي والكامل)
 
 // تعريف المتغيرات العامة اللازمة لاستدعائها من ملفات أخرى
 let globalGameConfig = {};
@@ -7,29 +7,28 @@ let currentScene = null;
 
 // تعريف دالة startGame التي يتم استدعاؤها من security.js بعد التحقق من الكود
 startGame = function(config) {
-    globalGameConfig = config; // حفظ الإعدادات التي تم قراءتها من config.json
+    globalGameConfig = config; 
 
     const phaserConfig = {
         type: Phaser.AUTO,
-        width: 1280,       // عرض الشاشة المبدئي
-        height: 720,       // طول الشاشة المبدئي
-        parent: 'game-container', // يمكننا لاحقًا ربطها بـ DIV محدد
+        width: 1280,       
+        height: 720,       
+        parent: 'game-container', 
         scene: {
             preload: preload,
             create: create,
             update: update
         },
         render: {
-            pixelArt: true // **مهم جداً:** لضمان وضوح تصميم البكسل آرت
+            pixelArt: true 
         },
         scale: {
-            mode: Phaser.Scale.FIT, // لتعديل حجم اللعبة حسب حجم شاشة المتصفح
+            mode: Phaser.Scale.FIT, 
             autoCenter: Phaser.Scale.CENTER_BOTH
         }
     };
 
     gameInstance = new Phaser.Game(phaserConfig);
-    console.log("Phaser Game Instance Created. Ready for Preload.");
 };
 
 // ===================================================
@@ -37,29 +36,36 @@ startGame = function(config) {
 // ===================================================
 
 function preload() {
-    // حفظ المشهد الحالي للوصول إليه من أي مكان
     currentScene = this; 
     
     // تحميل الخلفية
     this.load.image('background', 'assets/images/background.png');
     
-    // تحميل ملفات الصوت الأساسية (الـ 6 ملفات)
+    // تحميل ملفات الصوت (6 ملفات موجودة)
     this.load.audio('ui_click', 'assets/audio/ui_click.mp3');
     this.load.audio('winning', 'assets/audio/Winning.mp3');
     this.load.audio('Beginning_game', 'assets/audio/Beginning_game.mp3'); 
     this.load.audio('Flip_letter', 'assets/audio/Flip_letter.mp3');
     this.load.audio('correct_answer', 'assets/audio/correct_answer.mp3');
     this.load.audio('wrong_answer', 'assets/audio/wrong_answer.mp3');
-    
+
     // تحميل أصول الخلايا السداسية (Hex Cells)
     this.load.image('hex_cell_default', 'assets/images/hex_cell_default.png');
-    this.load.image('hex_cell_team1', 'assets/images/hex_cell_team1.png'); // الأحمر
-    this.load.image('hex_cell_team2', 'assets/images/hex_cell_team2.png'); // الأرجواني
+    this.load.image('hex_cell_team1', 'assets/images/hex_cell_team1.png'); 
+    this.load.image('hex_cell_team2', 'assets/images/hex_cell_team2.png'); 
+    this.load.image('hex_cell_selected', 'assets/images/hex_cell_selected.png'); 
 
-    // تحميل أصول شريط النقاط ومؤشر الدور
-    this.load.image('ui_scoreboard_bg', 'assets/images/ui_scoreboard_bg.png');
+    // تحميل المؤشرات والأزرار والموصلات (الملفات الموجودة فقط)
+    this.load.image('logo', 'assets/images/logo.png'); // تمت إعادته هنا للتحميل
     this.load.image('turn_indicator_arrow_to_left', 'assets/images/turn_indicator_arrow_to_left.png');
     this.load.image('turn_indicator_arrow_to_right', 'assets/images/turn_indicator_arrow_to_right.png');
+    this.load.image('ui_button_award_team1', 'assets/images/ui_button_award_team1.png'); 
+    this.load.image('ui_button_award_team2', 'assets/images/ui_button_award_team2.png');
+    this.load.image('ui_button_show_answer', 'assets/images/ui_button_show_answer.png');
+    this.load.image('connector_red_vertical_left', 'assets/images/connector_red_vertical_left.png');
+    this.load.image('connector_red_vertical_right', 'assets/images/connector_red_vertical_right.png');
+    this.load.image('connector_green_horizontal_upper', 'assets/images/connector_green_horizontal_upper.png');
+    this.load.image('connector_green_horizontal_down', 'assets/images/connector_green_horizontal_down.png');
 }
 
 // ===================================================
@@ -79,7 +85,6 @@ function handleHexClick(cellData) {
         cellData.state = (player === 1) ? 'team1' : 'team2';
 
         // نبدل الدور مؤقتاً لغرض التجربة البصرية فقط
-        // هذا السطر سيتغير لاحقاً ليحدث بعد الإجابة الصحيحة
         turnManager.switchTurn(); 
     }
 }
@@ -168,7 +173,7 @@ function create() {
     this.add.image(centerX, centerY, 'background').setDisplaySize(this.game.config.width, this.game.config.height);
 
     // ===================================================
-    // 3. بناء واجهة المستخدم وشريط النقاط
+    // 3. بناء واجهة المستخدم وشريط النقاط (استخدام الرسم المباشر)
     // ===================================================
     
     const scene = this;
@@ -176,9 +181,12 @@ function create() {
     const padding = 50;
     const scoreboardY = 50;
     
-    // خلفية شريط النقاط
-    const scoreboardBG = scene.add.image(gameWidth / 2, scoreboardY, 'ui_scoreboard_bg');
-    scoreboardBG.setDisplaySize(gameWidth - 100, 100); 
+    // خلفية شريط النقاط (مستطيل أسود مرسوم مباشرة بدلاً من الصورة المفقودة)
+    const scoreboardBG = scene.add.rectangle(gameWidth / 2, scoreboardY, gameWidth - 100, 100, 0x000000); 
+
+    // عرض اللوجو (الآن بعد أن تأكدنا من تحميله)
+    const logoImage = scene.add.image(gameWidth / 2, scoreboardY, 'logo');
+    logoImage.setDisplaySize(300, 80); // مقاس تقريبي لعرض اللوجو
 
     // تصميم النص العربي 
     const textStyle = { 
@@ -223,10 +231,7 @@ function create() {
     // حفظ نصوص النقاط لتحديثها لاحقاً
     scene.data.set('scoreTexts', { 1: score1Text, 2: score2Text });
 
-    // ===================================================
-    // 4. استدعاء دالة بناء شبكة الهيكساجون (الآن)
-    // ===================================================
-    // هذا هو السطر الذي يجعل الشبكة تظهر عند تحميل اللعبة
+    // 4. استدعاء دالة بناء شبكة الهيكساجون 
     buildHexGrid.call(this); 
 
     console.log("Game Created. Scoreboard & Hex Grid Loaded.");
