@@ -8,44 +8,22 @@
         body { margin: 0; padding: 0; background-color: #111; overflow: hidden; }
         canvas { display: block; margin: 0 auto; }
         
-        /* هذا هو تصميم الحماية المؤقت (شاشة إدخال الكود) */
+        /* تعريف الخط العربي (يجب تحميله من الإنترنت) */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        
+        /* تصميم شاشة الحماية (ستظهر أولاً) */
         #code-entry-container {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #111; /* يتناسب مع خلفية اللعبة الداكنة */
+            background-color: #111;
             color: #eee;
-            display: none; /* يتم إخفاؤه في البداية */
+            display: none; /* يتم إظهاره لاحقاً بواسطة الكود */
             flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: 'Cairo', Arial, sans-serif;
             z-index: 1000;
         }
-        #code-entry-container input, #code-entry-container button {
-            padding: 12px 20px;
-            font-size: 1.2em;
-            margin: 10px;
-            border: none;
-            border-radius: 8px;
-            text-align: center;
-        }
-        #code-entry-container input {
-            background-color: #333;
-            color: #eee;
-            border: 2px solid #555;
-        }
-        #code-entry-container button {
-            background-color: #198754; /* لون أخضر جذاب */
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        #code-entry-container button:hover {
-            background-color: #157347;
-        }
-        /* تعريف الخط العربي */
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-
     </style>
 </head>
 <body>
@@ -56,7 +34,6 @@
     <button id="code-entry-button">بدء اللعب</button>
     <p id="code-entry-message" style="color: #dc3545;"></p>
 </div>
-
 
 <script src="js/vendor/phaser.min.js"></script>
 <script src="js/security.js"></script>
