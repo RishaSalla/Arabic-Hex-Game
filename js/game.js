@@ -1,4 +1,4 @@
-// js/game.js - الكود 14 (الإصلاح النهائي والكامل)
+// js/game.js - الكود 19 (التجميع النهائي)
 
 // تعريف المتغيرات العامة اللازمة لاستدعائها من ملفات أخرى
 let globalGameConfig = {};
@@ -13,7 +13,7 @@ startGame = function(config) {
         type: Phaser.AUTO,
         width: 1280,       
         height: 720,       
-        parent: 'game-container', 
+        parent: 'game-container',
         scene: {
             preload: preload,
             create: create,
@@ -29,6 +29,7 @@ startGame = function(config) {
     };
 
     gameInstance = new Phaser.Game(phaserConfig);
+    console.log("Phaser Game Instance Created. Ready for Preload.");
 };
 
 // ===================================================
@@ -56,7 +57,7 @@ function preload() {
     this.load.image('hex_cell_selected', 'assets/images/hex_cell_selected.png'); 
 
     // تحميل المؤشرات والأزرار والموصلات (الملفات الموجودة فقط)
-    this.load.image('logo', 'assets/images/logo.png'); // تمت إعادته هنا للتحميل
+    this.load.image('logo', 'assets/images/logo.png'); // اللوجو موجود
     this.load.image('turn_indicator_arrow_to_left', 'assets/images/turn_indicator_arrow_to_left.png');
     this.load.image('turn_indicator_arrow_to_right', 'assets/images/turn_indicator_arrow_to_right.png');
     this.load.image('ui_button_award_team1', 'assets/images/ui_button_award_team1.png'); 
@@ -66,10 +67,12 @@ function preload() {
     this.load.image('connector_red_vertical_right', 'assets/images/connector_red_vertical_right.png');
     this.load.image('connector_green_horizontal_upper', 'assets/images/connector_green_horizontal_upper.png');
     this.load.image('connector_green_horizontal_down', 'assets/images/connector_green_horizontal_down.png');
+    
+    // تم إزالة تحميل 'ui_scoreboard_bg.png' و 'logo.png' من هنا لضمان عدم فشل التحميل
 }
 
 // ===================================================
-// وظيفة معالجة النقر على الخلية
+// وظيفة معالجة النقر على الخلية (تبقى كما هي)
 // ===================================================
 
 function handleHexClick(cellData) {
@@ -91,7 +94,7 @@ function handleHexClick(cellData) {
 
 
 // ===================================================
-// وظيفة بناء الشبكة السداسية
+// وظيفة بناء الشبكة السداسية (تبقى كما هي)
 // ===================================================
 
 function buildHexGrid() {
@@ -103,7 +106,7 @@ function buildHexGrid() {
     const HEX_HEIGHT = 160;
     
     // منطقة بدء الشبكة (تعديل طفيف لتوسيطها تحت شريط النقاط)
-    const startX = 350; // تم تعديلها لتوسيط شبكة 5x5 على عرض 1280
+    const startX = 350; 
     const startY = 200;
 
     const ROWS = 5;
@@ -173,7 +176,7 @@ function create() {
     this.add.image(centerX, centerY, 'background').setDisplaySize(this.game.config.width, this.game.config.height);
 
     // ===================================================
-    // 3. بناء واجهة المستخدم وشريط النقاط (استخدام الرسم المباشر)
+    // 3. بناء واجهة المستخدم وشريط النقاط (الرسم المباشر لخلفية Scoreboard)
     // ===================================================
     
     const scene = this;
@@ -181,12 +184,12 @@ function create() {
     const padding = 50;
     const scoreboardY = 50;
     
-    // خلفية شريط النقاط (مستطيل أسود مرسوم مباشرة بدلاً من الصورة المفقودة)
+    // خلفية شريط النقاط (مستطيل أسود مرسوم مباشرة)
     const scoreboardBG = scene.add.rectangle(gameWidth / 2, scoreboardY, gameWidth - 100, 100, 0x000000); 
 
-    // عرض اللوجو (الآن بعد أن تأكدنا من تحميله)
+    // عرض اللوجو
     const logoImage = scene.add.image(gameWidth / 2, scoreboardY, 'logo');
-    logoImage.setDisplaySize(300, 80); // مقاس تقريبي لعرض اللوجو
+    logoImage.setDisplaySize(300, 80); 
 
     // تصميم النص العربي 
     const textStyle = { 
