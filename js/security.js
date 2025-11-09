@@ -1,4 +1,4 @@
-// js/security.js
+// js/security.js - الكود 15ب (المنقح)
 
 // تحديد وظيفة startGame التي سيتم تعريفها لاحقًا في game.js
 let startGame;
@@ -6,17 +6,17 @@ let startGame;
 // دالة لجلب إعدادات اللعبة من ملف config.json
 async function loadConfig() {
     try {
-        // نعتمد على أن المشروع يعمل عبر خادم محلي لضمان قراءة ملفات JSON
+        // نعتمد على أن المشروع يعمل على GitHub Pages لضمان قراءة ملفات JSON
         const response = await fetch('data/config.json');
         if (!response.ok) {
             console.error("Critical Error: config.json failed to load with status:", response.status);
-            alert("فشل تحميل ملف الإعدادات. تأكد من تشغيل المشروع على خادم محلي.");
+            alert("فشل تحميل ملف الإعدادات. تأكد من وجوده في data/config.json.");
             return null;
         }
         return await response.json();
     } catch (error) {
         console.error("Critical Error fetching config.json:", error);
-        alert("خطأ أثناء قراءة ملف الإعدادات. تأكد من وجوده في data/config.json");
+        alert("خطأ أثناء قراءة ملف الإعدادات.");
         return null;
     }
 }
@@ -38,16 +38,12 @@ async function handleSecurity() {
     const button = document.getElementById('code-entry-button');
     const message = document.getElementById('code-entry-message');
     
-    // إظهار شاشة الحماية
+    // ===================================================
+    // إظهار شاشة الحماية (الآن فقط نغير الـ Display)
+    // التصميم بالكامل تم نقله إلى ملف index.html
+    // ===================================================
     container.style.display = 'flex';
     
-    // إضافة تصميم الواجهة لشاشة الحماية (التي تركناها فارغة في index.html)
-    // لتجنب التشعب، سنضيف هنا الـ CSS الخاص بتصميم الأزرار والحقول:
-    input.style.cssText = `padding: 12px 20px; font-size: 1.2em; margin: 10px; border: none; border-radius: 8px; text-align: center; background-color: #333; color: #eee; border: 2px solid #555;`;
-    button.style.cssText = `padding: 12px 20px; font-size: 1.2em; margin: 10px; border: none; border-radius: 8px; cursor: pointer; background-color: #198754; color: white; transition: background-color 0.2s;`;
-    container.querySelector('h1').style.cssText = 'font-size: 2em; margin-bottom: 20px;';
-
-
     button.onclick = () => {
         if (input.value === correctCode) {
             container.remove(); // إزالة الحاوية بالكامل من الـ DOM
