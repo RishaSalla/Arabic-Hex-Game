@@ -1,12 +1,12 @@
-// js/game.js - الكود 21 (التنقية والتشغيل النهائي)
+// js/game.js - الكود 22 (الإصلاح النهائي والكامل)
 
 // تعريف المتغيرات العامة اللازمة لاستدعائها من ملفات أخرى
 let globalGameConfig = {};
 let gameInstance = null;
 let currentScene = null;
-let allQuestions = {}; // متغير لتخزين جميع بيانات الأسئلة
+let allQuestions = {}; 
 
-// قائمة بأسماء ملفات الأسئلة المرقمة (لتجنب الخطأ في العد)
+// قائمة بأسماء ملفات الأسئلة المرقمة
 const QUESTION_FILES = [
     '01alif', '02ba', '03ta', '04tha', '05jeem', '06haa', '07khaa', '08dal', '09dhal', '10ra', 
     '11zay', '12seen', '13sheen', '14sad', '15dad', '16ta_a', '17zha', '18ain', '19ghain', '20fa', 
@@ -51,7 +51,7 @@ function preload() {
     // تحميل الخلفية
     this.load.image('background', 'assets/images/background.png');
     
-    // تحميل ملفات الصوت (6 ملفات موجودة)
+    // تحميل ملفات الصوت (الموجودة)
     this.load.audio('ui_click', 'assets/audio/ui_click.mp3');
     this.load.audio('winning', 'assets/audio/Winning.mp3');
     this.load.audio('Beginning_game', 'assets/audio/Beginning_game.mp3'); 
@@ -59,7 +59,7 @@ function preload() {
     this.load.audio('correct_answer', 'assets/audio/correct_answer.mp3');
     this.load.audio('wrong_answer', 'assets/audio/wrong_answer.mp3');
 
-    // تحميل أصول الخلايا السداسية والواجهة (الملفات الموجودة فقط)
+    // تحميل أصول الخلايا السداسية والواجهة
     this.load.image('hex_cell_default', 'assets/images/hex_cell_default.png');
     this.load.image('hex_cell_team1', 'assets/images/hex_cell_team1.png'); 
     this.load.image('hex_cell_team2', 'assets/images/hex_cell_team2.png'); 
@@ -101,7 +101,7 @@ function create() {
     });
 
     // ===================================================
-    // 3. بناء واجهة المستخدم وشريط النقاط (الرسم المباشر لخلفية Scoreboard)
+    // 3. بناء واجهة المستخدم وشريط النقاط (استخدام الرسم المباشر لخلفية Scoreboard)
     // ===================================================
     
     const scene = this;
@@ -168,8 +168,6 @@ function create() {
 function update() {
     // تُستخدم للحركة والتحقق المستمر إذا لزم الأمر
 }
-
-// ... (handleHexClick و buildHexGrid تبقى كما هي) ...
 
 // ===================================================
 // وظيفة معالجة النقر على الخلية
@@ -259,3 +257,4 @@ function buildHexGrid() {
     // حفظ الشبكة للاستخدام لاحقاً (لمنطق الفوز)
     scene.data.set('hexGrid', gridData);
 }
+```eof
