@@ -1,4 +1,4 @@
-// js/game.js - الكود 22 (الإصلاح النهائي والكامل)
+// js/game.js - الكود 31 (إصلاح مشكلة الأصول وبناء الواجهة)
 
 // تعريف المتغيرات العامة اللازمة لاستدعائها من ملفات أخرى
 let globalGameConfig = {};
@@ -6,18 +6,22 @@ let gameInstance = null;
 let currentScene = null;
 let allQuestions = {}; 
 
-// قائمة بأسماء ملفات الأسئلة المرقمة
+// قائمة بأسماء ملفات الأسئلة المرقمة (لتجنب الخطأ في العد)
 const QUESTION_FILES = [
     '01alif', '02ba', '03ta', '04tha', '05jeem', '06haa', '07khaa', '08dal', '09dhal', '10ra', 
     '11zay', '12seen', '13sheen', '14sad', '15dad', '16ta_a', '17zha', '18ain', '19ghain', '20fa', 
     '21qaf', '22kaf', '23lam', '24meem', '25noon', '26ha_a', '27waw', '28ya'
 ];
 
+// التأكد من تحميل مدير الأدوار (يجب أن يتم تحميله في index.html قبل game.js)
+// const turnManager = new TurnManager(); // يتم افتراض وجوده ككائن عام من ملف turn_manager.js
+
 
 // تعريف دالة startGame التي يتم استدعاؤها من security.js بعد التحقق من الكود
 startGame = function(config) {
     globalGameConfig = config; 
 
+    // إعدادات Phaser
     const phaserConfig = {
         type: Phaser.AUTO,
         width: 1280,       
@@ -51,7 +55,7 @@ function preload() {
     // تحميل الخلفية
     this.load.image('background', 'assets/images/background.png');
     
-    // تحميل ملفات الصوت (الموجودة)
+    // تحميل ملفات الصوت (6 ملفات موجودة)
     this.load.audio('ui_click', 'assets/audio/ui_click.mp3');
     this.load.audio('winning', 'assets/audio/Winning.mp3');
     this.load.audio('Beginning_game', 'assets/audio/Beginning_game.mp3'); 
@@ -59,7 +63,7 @@ function preload() {
     this.load.audio('correct_answer', 'assets/audio/correct_answer.mp3');
     this.load.audio('wrong_answer', 'assets/audio/wrong_answer.mp3');
 
-    // تحميل أصول الخلايا السداسية والواجهة
+    // تحميل أصول الخلايا السداسية والواجهة (الملفات الموجودة فقط)
     this.load.image('hex_cell_default', 'assets/images/hex_cell_default.png');
     this.load.image('hex_cell_team1', 'assets/images/hex_cell_team1.png'); 
     this.load.image('hex_cell_team2', 'assets/images/hex_cell_team2.png'); 
@@ -85,18 +89,19 @@ function create() {
     // 1. تثبيت الأبعاد النهائية للشاشة
     this.game.scale.resize(1280, 720); 
 
-    // 2. وضع الخلفية أولاً
+    // 2. وضع الخلفية
     const centerX = this.game.config.width / 2;
     const centerY = this.game.config.height / 2;
     this.add.image(centerX, centerY, 'background').setDisplaySize(this.game.config.width, this.game.config.height);
 
     // 2.5 معالجة بيانات الأسئلة
+    // نقوم بتخزين الأسئلة بحيث يكون مفتاح كل مجموعة هو الحرف ('أ', 'ب', ...)
     QUESTION_FILES.forEach(fileName => {
         const data = this.cache.json.get(fileName);
-        if (data) {
+        if (data && data.letter) {
             allQuestions[data.letter] = data.questions;
         } else {
-            console.warn(`Failed to load questions for ${fileName}. Ensure file exists and is valid JSON.`);
+            console.warn(`Failed to load or process questions for ${fileName}.`);
         }
     });
 
@@ -109,8 +114,8 @@ function create() {
     const padding = 50;
     const scoreboardY = 50;
     
-    // خلفية شريط النقاط (مستطيل أسود مرسوم مباشرة)
-    const scoreboardBG = scene.add.rectangle(gameWidth / 2, scoreboardY, gameWidth - 100, 100, 0x000000); 
+    // خلفية شريط النقاط (مستطيل أسود مرسوم مباشرة بدلاً من الصورة المفقودة)
+    const scoreboardBG = scene.add.rectangle(gameWidth / 2, scoreboardY, gameWidth - 100, 100, 0x000000, 0.9); // 0x000000 = أسود
 
     // عرض اللوجو
     const logoImage = scene.add.image(gameWidth / 2, scoreboardY, 'logo');
@@ -209,7 +214,7 @@ function buildHexGrid() {
     const ROWS = 5;
     const COLS = 5;
 
-    // الحروف/الأرقام الأولية (سيتم استخدامها لحين تحميل بيانات الأسئلة)
+    // الحروف/الأرقام الأولية (يجب أن تتطابق مع مفاتيح ملفات JSON المحملة)
     const initialContent = ['أ', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه']; // 25 حرف لـ 5x5
     let contentIndex = 0;
 
@@ -229,10 +234,14 @@ function buildHexGrid() {
             
             // 2. إنشاء النص العربي داخل الخلية
             const letter = initialContent[contentIndex++];
+
+            // تحقق بسيط للتأكد من أن الحرف موجود في بيانات الأسئلة
+            const textColor = allQuestions[letter] ? '#111111' : '#dc3545'; 
+
             const hexText = scene.add.text(x, y, letter, {
                 fontFamily: 'Cairo',
                 fontSize: '32px',
-                color: '#111111', 
+                color: textColor, // استخدم اللون للتنبيه إذا كان الحرف مفقوداً
                 rtl: true
             }).setOrigin(0.5);
 
@@ -249,7 +258,11 @@ function buildHexGrid() {
 
             // 4. تفعيل حدث النقر (يرتبط بالدالة handleHexClick المعرفة أعلاه)
             hexImage.on('pointerdown', () => {
-                handleHexClick.call(scene, cellData);
+                // تأكد أن الخلية غير مستخدمة وأن هناك أسئلة للحرف قبل النقر
+                if (cellData.state === 'default' && allQuestions[letter]) { 
+                    scene.sound.play('ui_click');
+                    handleHexClick.call(scene, cellData);
+                }
             });
         }
     }
@@ -257,4 +270,3 @@ function buildHexGrid() {
     // حفظ الشبكة للاستخدام لاحقاً (لمنطق الفوز)
     scene.data.set('hexGrid', gridData);
 }
-```eof
