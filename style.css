@@ -466,3 +466,33 @@ body.light-mode {
     margin-bottom: var(--hex-vertical-overlap); 
     transition: transform 0.2s ease, filter 0.2s ease;
 }
+
+/* ===== 11. تصميم الخلايا المملوكة (Owned Cells) ===== */
+
+/* هذه الكلاسات الجديدة ستحل محل 'hex-cell-default'
+  وتضمن بقاء الحرف ظاهراً
+*/
+.hex-cell-purple-owned,
+.hex-cell-red-owned {
+    /* نحتاج لوضع !important لضمان أن الخلفية 
+      الجديدة تتفوق على 'hex.cell.default.png'
+    */
+    background-image: none !important; 
+}
+
+.hex-cell-purple-owned {
+    background-color: var(--color-purple);
+}
+
+.hex-cell-red-owned {
+    background-color: var(--color-red);
+}
+
+/* تغيير لون الحرف ليصبح أبيضاً 
+  ليكون واضحاً على الخلفية الملونة
+*/
+.hex-cell-purple-owned .hex-letter,
+.hex-cell-red-owned .hex-letter {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* ظل غامق */
+}
