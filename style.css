@@ -193,3 +193,78 @@ body.light-mode {
 .start-button:hover {
     transform: scale(1.05);
 }
+
+/* ===== 7. تصميم ساحة اللعب (Game Board) ===== */
+
+/* تحديد أحجام الخلايا السداسية */
+:root {
+    --hex-width: 90px;  /* عرض الخلية */
+    --hex-height: 104px; /* ارتفاع الخلية (العرض * 1.1547) */
+    
+    /* هذه هي أهم المتغيرات لحل "التلاصق"
+      نستخدم الهوامش السلبية (negative margins) لجعلها تتداخل
+    */
+    --hex-vertical-overlap: -26px;  /* مقدار تداخلها عمودياً */
+    --hex-horizontal-overlap: -13px; /* مقدار تداخلها أفقياً */
+
+    /* مقدار إزاحة الأعمدة الزوجية (نصف الارتفاع) */
+    --hex-vertical-offset: 52px; /* (var(--hex-height) / 2) */
+}
+
+/* 1. الحاوية الرئيسية للوحة */
+#game-board-container {
+    display: flex; /* نستخدم flex لترتيب الأعمدة بجانب بعضها */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin-top: calc(var(--hex-vertical-offset) * -1); /* سحب اللوحة للأعلى */
+}
+
+/* 2. تصميم العمود */
+.hex-column {
+    display: flex;
+    flex-direction: column; /* ترتيب الخلايا داخل العمود بشكل عمودي */
+    margin: 0 var(--hex-horizontal-overlap); /* التداخل الأفقي */
+}
+
+/* 3. إزاحة الأعمدة "الزوجية" (الثاني، الرابع، السادس) */
+.hex-column:nth-child(even) {
+    margin-top: var(--hex-vertical-offset); /* <-- هذا هو سر الترتيب السداسي */
+}
+
+/* 4. تصميم الخلية السداسية الأساسية */
+.hex-cell {
+    width: var(--hex-width);
+    height: var(--hex-height);
+    
+    /* استخدام الصور كخلفية */
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    /* التداخل العمودي */
+    margin-bottom: var(--hex-vertical-overlap); 
+    
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* 5. تطبيق صور الخلفية لكل نوع خلية */
+.hex-cell-default {
+    background-image: url('../assets/images/hex.cell.default.png');
+}
+.hex-cell-red {
+    background-image: url('../assets/images/hex.red.png');
+}
+.hex-cell-purple {
+    background-image: url('../assets/images/hex.purple.png');
+}
+.hex-cell-selected {
+    background-image: url('../assets/images/hex.cell.selected.png');
+}
+
+/* 6. تأثير بسيط عند التمرير على الخلايا القابلة للعب */
+.hex-cell.playable:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+    cursor: pointer;
+}
