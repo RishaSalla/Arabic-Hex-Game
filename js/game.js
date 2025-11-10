@@ -6,7 +6,6 @@ const gameBoardContainer = document.getElementById('game-board-container');
 const settingButtons = document.querySelectorAll('.setting-button');
 const startGameButton = document.getElementById('start-game-button');
 
-// عناصر نافذة السؤال (جديدة)
 const questionModalOverlay = document.getElementById('question-modal-overlay');
 const questionText = document.getElementById('question-text');
 const showAnswerButton = document.getElementById('show-answer-button');
@@ -18,12 +17,39 @@ const skipQuestionButton = document.getElementById('skip-question-button');
 
 // --- إعدادات اللعبة (Game Settings) ---
 export const gameSettings = {
-    mode: 'turns',      // 'turns' (أدوار) or 'competitive' (تنافسي)
-    teams: '2p',        // '2p' (لاعبين) or 'full' (فرق)
-    timer: 'off'        // 'on' or 'off'
+    mode: 'turns',
+    teams: '2p',
+    timer: 'off'
 };
 
+// --- (جديد) قائمة الحروف الأساسية ---
+// (مطابقة لأسماء ملفات .json في مجلد data/questions)
+const ALL_LETTERS = [
+    { id: '01alif', char: 'أ' }, { id: '02ba', char: 'ب' }, { id: '03ta', char: 'ت' },
+    { id: '04tha', char: 'ث' }, { id: '05jeem', char: 'ج' }, { id: '06haa', char: 'ح' },
+    { id: '07khaa', char: 'خ' }, { id: '08dal', char: 'د' }, { id: '09dhal', char: 'ذ' },
+    { id: '10ra', char: 'ر' }, { id: '11zay', char: 'ز' }, { id: '12seen', char: 'س' },
+    { id: '13sheen', char: 'ش' }, { id: '14sad', char: 'ص' }, { id: '15dad', char: 'ض' },
+    { id: '16ta_a', char: 'ط' }, { id: '17zha', char: 'ظ' }, { id: '18ain', char: 'ع' },
+    { id: '19ghain', char: 'غ' }, { id: '20fa', char: 'ف' }, { id: '21qaf', char: 'ق' },
+    { id: '22kaf', char: 'ك' }, { id: '23lam', char: 'ل' }, { id: '24meem', char: 'م' },
+    { id: '25noon', char: 'ن' }, { id: '26ha_a', char: 'هـ' }, { id: '27waw', char: 'و' },
+    { id: '28ya', char: 'ي' }
+];
+
 // --- الوظائف (Functions) ---
+
+/**
+ * 0. (جديد) وظيفة لخلط أي مصفوفة (خوارزمية Fisher-Yates)
+ */
+function shuffleArray(array) {
+    let newArray = [...array]; // ننسخ المصفوفة الأصلية لتجنب تعديلها
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // تبديل العناصر
+    }
+    return newArray;
+}
 
 /**
  * 1. معالجة الضغط على أزرار الإعدادات
@@ -31,11 +57,10 @@ export const gameSettings = {
 function handleSettingClick(event) {
     // ... (الكود السابق كما هو) ...
     const clickedButton = event.target;
-    const settingType = clickedButton.dataset.setting; // 'mode', 'teams', or 'timer'
-    const settingValue = clickedButton.dataset.value;  // 'turns', 'competitive', etc.
+    const settingType = clickedButton.dataset.setting;
+    const settingValue = clickedButton.dataset.value;
 
     gameSettings[settingType] = settingValue;
-    console.log('الإعدادات المحدثة:', gameSettings);
 
     const buttonsInGroup = document.querySelectorAll(`.setting-button[data-setting="${settingType}"]`);
     buttonsInGroup.forEach(btn => btn.classList.remove('active'));
@@ -43,7 +68,7 @@ function handleSettingClick(event) {
 }
 
 /**
- * 2. وظيفة بدء اللعبة (الانتقال للشاشة التالية)
+ * 2. وظيفة بدء اللعبة
  */
 function startGame() {
     mainMenuScreen.classList.remove('active');
@@ -52,10 +77,15 @@ function startGame() {
 }
 
 /**
- * 3. وظيفة بناء لوحة اللعب السداسية
+ * 3. وظيفة بناء لوحة اللعب السداسية (تم تحديثها)
  */
 function initializeGameBoard() {
     gameBoardContainer.innerHTML = '';
+
+    // (جديد) خلط الحروف واختيار أول 25
+    const shuffledLetters = shuffleArray(ALL_LETTERS);
+    const gameLetters = shuffledLetters.slice(0, 25);
+    let letterIndex = 0; // مؤشر لتتبع الحرف التالي
 
     for (let col = 0; col < 7; col++) {
         const column = document.createElement('div');
@@ -77,7 +107,17 @@ function initializeGameBoard() {
                 // الخلايا الرمادية في المنتصف (5x5)
                 cell.classList.add('hex-cell-default', 'playable');
                 
-                // (جديد!) ربط حدث النقر بالخلية
+                // (جديد) إضافة الحرف للخلية
+                const letter = gameLetters[letterIndex];
+                cell.dataset.letterId = letter.id; // تخزين '01alif'
+                
+                const letterSpan = document.createElement('span');
+                letterSpan.classList.add('hex-letter');
+                letterSpan.textContent = letter.char; // إظهار 'أ'
+                cell.appendChild(letterSpan);
+                
+                letterIndex++; // الانتقال للحرف التالي
+
                 cell.addEventListener('click', handleCellClick);
             }
             column.appendChild(cell);
@@ -87,31 +127,38 @@ function initializeGameBoard() {
 }
 
 /**
- * 4. وظيفة معالجة النقر على الخلية (جديدة)
+ * 4. وظيفة معالجة النقر على الخلية (تم تحديثها)
  */
 function handleCellClick(event) {
     const clickedCell = event.currentTarget;
+    const letterId = clickedCell.dataset.letterId; // '01alif'
+    const letterChar = clickedCell.querySelector('.hex-letter').textContent; // 'أ'
 
-    // (مؤقتاً) سنضع نصوص وهمية
-    questionText.textContent = 'هذا هو السؤال الخاص بالخلية التي تم النقر عليها؟';
-    answerText.textContent = 'هذا هو الجواب الصحيح للسؤال.';
+    // (جديد) منع النقر على خلية ملونة
+    if (!clickedCell.classList.contains('playable')) {
+        return; // توقف هنا إذا الخلية غير قابلة للعب
+    }
+
+    // (جديد) جلب السؤال بناءً على الحرف (سنبني هذه الوظيفة لاحقاً)
+    // fetchQuestionForLetter(letterId); 
     
-    // (جديد) إخفاء قسم الجواب عند فتح النافذة
+    // (مؤقتاً) سنستخدم الحرف في السؤال الوهمي
+    questionText.textContent = `سؤال عشوائي لحرف (${letterChar})؟`;
+    answerText.textContent = `جواب عشوائي لحرف (${letterChar}).`;
+    
     answerRevealSection.style.display = 'none';
-
-    // (جديد) إظهار النافذة المنبثقة
     questionModalOverlay.style.display = 'flex';
 }
 
 /**
- * 5. وظيفة إظهار الجواب (جديدة)
+ * 5. وظيفة إظهار الجواب
  */
 function showAnswer() {
     answerRevealSection.style.display = 'block';
 }
 
 /**
- * 6. وظيفة إغلاق النافذة (جديدة)
+ * 6. وظيفة إغلاق النافذة
  */
 function closeModal() {
     questionModalOverlay.style.display = 'none';
@@ -124,8 +171,7 @@ settingButtons.forEach(button => {
 
 startGameButton.addEventListener('click', startGame);
 
-// (جديد) ربط أحداث أزرار النافذة
 showAnswerButton.addEventListener('click', showAnswer);
-teamPurpleWinButton.addEventListener('click', closeModal); // (مؤقتاً)
-teamRedWinButton.addEventListener('click', closeModal);     // (مؤقتاً)
-skipQuestionButton.addEventListener('click', closeModal); // (مؤقتاً)
+teamPurpleWinButton.addEventListener('click', closeModal);
+teamRedWinButton.addEventListener('click', closeModal);
+skipQuestionButton.addEventListener('click', closeModal);
