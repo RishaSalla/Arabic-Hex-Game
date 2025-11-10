@@ -22,8 +22,13 @@ export const gameSettings = {
     timer: 'off'
 };
 
-// --- (جديد) قائمة الحروف الأساسية ---
-// (مطابقة لأسماء ملفات .json في مجلد data/questions)
+// --- (جديد) متغيرات حالة اللعبة ---
+const questionCache = {};   // لتخزين الأسئلة التي تم جلبها من JSON
+let usedQuestions = {};     // لتتبع الأسئلة المستخدمة
+let currentClickedCell = null; // لتذكر الخلية التي تم النقر عليها
+let currentQuestion = null;   // لتذكر السؤال الحالي
+
+// --- قائمة الحروف الأساسية ---
 const ALL_LETTERS = [
     { id: '01alif', char: 'أ' }, { id: '02ba', char: 'ب' }, { id: '03ta', char: 'ت' },
     { id: '04tha', char: 'ث' }, { id: '05jeem', char: 'ج' }, { id: '06haa', char: 'ح' },
@@ -40,57 +45,74 @@ const ALL_LETTERS = [
 // --- الوظائف (Functions) ---
 
 /**
- * 0. (جديد) وظيفة لخلط أي مصفوفة (خوارزمية Fisher-Yates)
+ * 0. وظيفة لخلط أي مصفوفة
  */
 function shuffleArray(array) {
-    let newArray = [...array]; // ننسخ المصفوفة الأصلية لتجنب تعديلها
+    let newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // تبديل العناصر
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     return newArray;
 }
 
 /**
- * 1. معالجة الضغط على أزرار الإعدادات
+ * (جديد) 1. جلب سجل الأسئلة المستخدمة من LocalStorage
+ */
+function loadUsedQuestions() {
+    const stored = localStorage.getItem('hrof_used_questions');
+    if (stored) {
+        usedQuestions = JSON.parse(stored);
+    } else {
+        usedQuestions = {};
+    }
+}
+
+/**
+ * (جديد) 2. حفظ سجل الأسئلة في LocalStorage
+ */
+function saveUsedQuestions() {
+    localStorage.setItem('hrof_used_questions', JSON.stringify(usedQuestions));
+}
+
+/**
+ * 3. معالجة الضغط على أزرار الإعدادات
  */
 function handleSettingClick(event) {
     // ... (الكود السابق كما هو) ...
     const clickedButton = event.target;
     const settingType = clickedButton.dataset.setting;
     const settingValue = clickedButton.dataset.value;
-
     gameSettings[settingType] = settingValue;
-
     const buttonsInGroup = document.querySelectorAll(`.setting-button[data-setting="${settingType}"]`);
     buttonsInGroup.forEach(btn => btn.classList.remove('active'));
     clickedButton.classList.add('active');
 }
 
 /**
- * 2. وظيفة بدء اللعبة
+ * 4. وظيفة بدء اللعبة
  */
 function startGame() {
     mainMenuScreen.classList.remove('active');
     gameScreen.classList.add('active');
+    loadUsedQuestions(); // (جديد) جلب السجل عند بدء اللعبة
     initializeGameBoard();
+    // (لاحقاً)
+    // TurnManager.startGame(); 
 }
 
 /**
- * 3. وظيفة بناء لوحة اللعب السداسية (تم تحديثها)
+ * 5. وظيفة بناء لوحة اللعب السداسية
  */
 function initializeGameBoard() {
     gameBoardContainer.innerHTML = '';
-
-    // (جديد) خلط الحروف واختيار أول 25
     const shuffledLetters = shuffleArray(ALL_LETTERS);
     const gameLetters = shuffledLetters.slice(0, 25);
-    let letterIndex = 0; // مؤشر لتتبع الحرف التالي
+    let letterIndex = 0;
 
     for (let col = 0; col < 7; col++) {
         const column = document.createElement('div');
         column.classList.add('hex-column');
-        
         for (let row = 0; row < 7; row++) {
             const cell = document.createElement('div');
             cell.classList.add('hex-cell');
@@ -104,20 +126,14 @@ function initializeGameBoard() {
             } else if ((row > 0 && row < 6) && (col === 0 || col === 6)) {
                 cell.classList.add('hex-cell-purple');
             } else {
-                // الخلايا الرمادية في المنتصف (5x5)
                 cell.classList.add('hex-cell-default', 'playable');
-                
-                // (جديد) إضافة الحرف للخلية
                 const letter = gameLetters[letterIndex];
-                cell.dataset.letterId = letter.id; // تخزين '01alif'
-                
+                cell.dataset.letterId = letter.id;
                 const letterSpan = document.createElement('span');
                 letterSpan.classList.add('hex-letter');
-                letterSpan.textContent = letter.char; // إظهار 'أ'
+                letterSpan.textContent = letter.char;
                 cell.appendChild(letterSpan);
-                
-                letterIndex++; // الانتقال للحرف التالي
-
+                letterIndex++;
                 cell.addEventListener('click', handleCellClick);
             }
             column.appendChild(cell);
@@ -127,41 +143,130 @@ function initializeGameBoard() {
 }
 
 /**
- * 4. وظيفة معالجة النقر على الخلية (تم تحديثها)
+ * 6. وظيفة معالجة النقر على الخلية (محدثة)
  */
-function handleCellClick(event) {
+async function handleCellClick(event) {
     const clickedCell = event.currentTarget;
     const letterId = clickedCell.dataset.letterId; // '01alif'
-    const letterChar = clickedCell.querySelector('.hex-letter').textContent; // 'أ'
 
-    // (جديد) منع النقر على خلية ملونة
     if (!clickedCell.classList.contains('playable')) {
-        return; // توقف هنا إذا الخلية غير قابلة للعب
+        return; 
     }
 
-    // (جديد) جلب السؤال بناءً على الحرف (سنبني هذه الوظيفة لاحقاً)
-    // fetchQuestionForLetter(letterId); 
-    
-    // (مؤقتاً) سنستخدم الحرف في السؤال الوهمي
-    questionText.textContent = `سؤال عشوائي لحرف (${letterChar})؟`;
-    answerText.textContent = `جواب عشوائي لحرف (${letterChar}).`;
-    
-    answerRevealSection.style.display = 'none';
-    questionModalOverlay.style.display = 'flex';
+    currentClickedCell = clickedCell; // تذكر الخلية التي تم النقر عليها
+
+    // (جديد) جلب السؤال الحقيقي
+    const question = await getQuestionForLetter(letterId);
+
+    if (question) {
+        currentQuestion = question; // تذكر السؤال الحالي
+        questionText.textContent = question.question;
+        answerText.textContent = question.answer;
+        
+        answerRevealSection.style.display = 'none';
+        questionModalOverlay.style.display = 'flex';
+    } else {
+        // في حالة لم يتم العثور على سؤال (خطأ في الملف مثلاً)
+        questionText.textContent = 'عذراً، لا توجد أسئلة لهذا الحرف حالياً.';
+        answerText.textContent = '';
+        answerRevealSection.style.display = 'none';
+        questionModalOverlay.style.display = 'flex';
+    }
 }
 
 /**
- * 5. وظيفة إظهار الجواب
+ * (جديد) 7. جلب سؤال لحرف معين
+ */
+async function getQuestionForLetter(letterId) {
+    // 1. جلب الأسئلة (من الكاش أو من الملف)
+    if (!questionCache[letterId]) {
+        try {
+            const response = await fetch(`data/questions/${letterId}.json`);
+            if (!response.ok) throw new Error('ملف السؤال غير موجود');
+            questionCache[letterId] = await response.json();
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
+    const allQuestions = questionCache[letterId];
+    if (allQuestions.length === 0) return null; // ملف فارغ
+
+    // 2. البحث عن أسئلة غير مستخدمة
+    let unusedQuestions = [];
+    for (let i = 0; i < allQuestions.length; i++) {
+        const questionId = `${letterId}_q${i}`; // '01alif_q0', '01alif_q1'
+        if (!usedQuestions[questionId]) {
+            unusedQuestions.push({
+                ...allQuestions[i], // { question: "...", answer: "..." }
+                id: questionId // إضافة المعرف الفريد
+            });
+        }
+    }
+
+    // 3. (الأهم) إذا تم استخدام كل الأسئلة
+    if (unusedQuestions.length === 0) {
+        console.log(`تم استخدام كل أسئلة ${letterId}. إعادة التعيين...`);
+        // إعادة التدوير (كما اتفقنا)
+        for (let i = 0; i < allQuestions.length; i++) {
+            const questionId = `${letterId}_q${i}`;
+            delete usedQuestions[questionId]; // حذفها من السجل
+        }
+        saveUsedQuestions(); // حفظ السجل المحدث
+        // الآن، كل الأسئلة متاحة مجدداً
+        unusedQuestions = allQuestions.map((q, i) => ({
+            ...q,
+            id: `${letterId}_q${i}`
+        }));
+    }
+
+    // 4. اختيار سؤال عشوائي من قائمة "غير المستخدمة"
+    const randomIndex = Math.floor(Math.random() * unusedQuestions.length);
+    return unusedQuestions[randomIndex];
+}
+
+
+/**
+ * 8. وظيفة إظهار الجواب
  */
 function showAnswer() {
     answerRevealSection.style.display = 'block';
 }
 
 /**
- * 6. وظيفة إغلاق النافذة
+ * (جديد ومحدث) 9. معالجة نتيجة السؤال (بدلاً من closeModal)
  */
-function closeModal() {
+function handleQuestionResult(result) {
+    // 1. إغلاق النافذة
     questionModalOverlay.style.display = 'none';
+
+    // 2. تسجيل السؤال كمستخدم (حتى لو "تخطي")
+    if (currentQuestion) {
+        usedQuestions[currentQuestion.id] = true;
+        saveUsedQuestions();
+    }
+    
+    // 3. تلوين الخلية
+    if (result === 'purple' || result === 'red') {
+        const teamColor = result; // 'purple' or 'red'
+        
+        // إزالة الكلاسات القديمة
+        currentClickedCell.classList.remove('playable', 'hex-cell-default');
+        
+        // إضافة الكلاس الجديد
+        currentClickedCell.classList.add(`hex-cell-${teamColor}-owned`);
+        
+        // (لاحقاً)
+        // checkWinCondition(teamColor);
+    }
+    
+    // 4. (لاحقاً)
+    // TurnManager.nextTurn();
+
+    // 5. مسح المتغيرات الحالية
+    currentClickedCell = null;
+    currentQuestion = null;
 }
 
 // --- ربط الأحداث (Event Listeners) ---
@@ -172,6 +277,7 @@ settingButtons.forEach(button => {
 startGameButton.addEventListener('click', startGame);
 
 showAnswerButton.addEventListener('click', showAnswer);
-teamPurpleWinButton.addEventListener('click', closeModal);
-teamRedWinButton.addEventListener('click', closeModal);
-skipQuestionButton.addEventListener('click', closeModal);
+// (محدث) ربط الأزرار بالوظيفة الجديدة
+teamPurpleWinButton.addEventListener('click', () => handleQuestionResult('purple'));
+teamRedWinButton.addEventListener('click', () => handleQuestionResult('red'));
+skipQuestionButton.addEventListener('click', () => handleQuestionResult('skip'));
