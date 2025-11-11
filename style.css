@@ -27,7 +27,7 @@
     --hex-horizontal-offset: 60px; /* (width * 0.5) */
     
     /* (إصلاح التباعد) تداخل أفقي (75% من العرض) */
-    --hex-horizontal-overlap: -11px; /* (width * 0.25) بالسالب */
+    --hex-horizontal-overlap: -13px; /* (width * 0.25) بالسالب */
 }
 
 body {
