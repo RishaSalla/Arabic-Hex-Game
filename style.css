@@ -3,8 +3,8 @@
 
 :root {
     --font-primary: 'Cairo', sans-serif;
-    --color-dark-bg: #1a1a2e; /* خلفية الوضع الغامق */
-    --color-light-bg: #f0f0f0; /* خلفية الوضع الفاتح */
+    --color-dark-bg: #1a1a2e;
+    --color-light-bg: #f0f0f0;
     --color-text-dark: #ffffff;
     --color-text-light: #111111;
     --color-purple: #8e44ad;
@@ -17,35 +17,30 @@ body {
     font-family: var(--font-primary);
     margin: 0;
     padding: 0;
-    overflow: hidden; /* إخفاء أي 'scrollbars' */
+    overflow: hidden;
     color: var(--color-text-dark);
     transition: background-color 0.3s ease;
-    
-    /* (جديد) إعدادات الخلفية العامة */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* ضمان أن المحتوى يملأ الشاشة */
     height: 100vh;
 }
 
-/* (تم التعديل) 
-  نظام تبديل الأوضاع (فاتح/غامق) مع الخلفيات 
-*/
+/* ===== 1.1: نظام تبديل الأوضاع (فاتح/غامق) مع الخلفيات ===== */
 body.dark-mode {
-    background-color: var(--color-dark-bg); /* لون احتياطي */
+    background-color: var(--color-dark-bg);
     background-image: url('assets/images/background.dark.png');
     color: var(--color-text-dark);
 }
 body.light-mode {
-    background-color: var(--color-light-bg); /* لون احتياطي */
+    background-color: var(--color-light-bg);
     background-image: url('assets/images/background.light.png');
     color: var(--color-text-light);
 }
 
 /* ===== 2. نظام إدارة الشاشات (Screen Management) ===== */
 .screen {
-    display: none; /* إخفاء جميع الشاشات افتراضياً */
+    display: none;
     width: 100vw;
     height: 100vh;
     align-items: center;
@@ -54,22 +49,26 @@ body.light-mode {
 }
 
 .screen.active {
-    display: flex; /* إظهار الشاشة 'النشطة' فقط */
+    display: flex;
 }
 
-/* (تم التعديل) 
-  تصميم شاشة الدخول (Security Screen)
-*/
+/* ===== 3. (تصميم جديد) شاشة الدخول (Security Screen) ===== */
 .login-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    padding: 40px 30px;
     
-    /* (جديد) تحديد عرض لجعلها مضغوطة */
+    /* (جديد) تصميم إبداعي كخلفية */
+    background: linear-gradient(145deg, #1f1f3e, #1a1a2e);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    
+    /* (جديد) استخدام 'clip-path' لإعطاء شكل سداسي بسيط */
+    /* (يمكنك إلغاء التعليق عنه إذا أردت شكلاً سداسياً) */
+    /* clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); */
+    
     max-width: 400px;
     width: 90%;
 }
@@ -82,43 +81,48 @@ body.light-mode {
 .login-container label {
     font-size: 1.2rem;
     margin-bottom: 10px;
+    color: var(--color-text-dark);
 }
 
 .login-container input {
     font-family: var(--font-primary);
-    padding: 10px;
+    padding: 12px;
     border: 2px solid var(--color-grey);
     border-radius: 8px;
     text-align: center;
     font-size: 1.1rem;
     margin-bottom: 20px;
-    direction: ltr; 
-    width: 80%; /* (جديد) تعديل العرض */
+    direction: ltr;
+    width: 80%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
 }
 
 .login-container button {
     font-family: var(--font-primary);
     font-size: 1.2rem;
     font-weight: bold;
-    padding: 10px 30px;
+    padding: 12px 30px;
     border: none;
     border-radius: 8px;
     background-color: var(--color-yellow);
     color: var(--color-dark-bg);
     cursor: pointer;
-    transition: transform 0.2s ease;
-    width: 85%; /* (جديد) تعديل العرض */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 85%;
+    box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
 }
 
 .login-container button:hover {
     transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(241, 196, 15, 0.5);
 }
 
 #login-error-message {
     color: var(--color-red);
     font-weight: bold;
     margin-top: 15px;
-    min-height: 1.2em; 
+    min-height: 1.2em;
 }
 
 /* ===== 4. أنيميشن الاهتزاز (Shake Animation) ===== */
@@ -134,7 +138,7 @@ body.light-mode {
 
 /* ===== 5. تصميم شاشة تدوير الجوال (Rotate Overlay) ===== */
 #rotate-device-overlay {
-    display: none; 
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -211,49 +215,69 @@ body.light-mode {
     transform: scale(1.05);
 }
 
-/* ===== 7. تصميم ساحة اللعب (Game Board) ===== */
+/* ===== 7. (مُعدل) تصميم ساحة اللعب (Game Board) ===== */
 
-/* تحديد أحجام الخلايا السداسية */
+/* (مُعدل) تحديد أحجام الخلايا السداسية */
 :root {
+    /* هذه القيم محسوبة بدقة لصور hex.cell.png */
+    /* يمكنك زيادة أو تقليل --hex-width لتكبير/تصغير اللوحة */
     --hex-width: 90px;
-    --hex-height: 104px; 
-    --hex-vertical-overlap: -26px;
-    --hex-horizontal-overlap: -13px; 
-    --hex-vertical-offset: 52px; 
+    --hex-height: 104px; /* (العرض * 1.1547) */
+    
+    /* هذه هي القيم السحرية للتداخل الصحيح 
+      (لا تغيرها إلا إذا غيرت حجم الخلية)
+    */
+    --hex-vertical-overlap: -26px;  /* (الارتفاع / 4) بالسالب */
+    --hex-horizontal-overlap: -22px; /* (العرض / 4) بالسالب */
+    --hex-vertical-offset: 52px; /* (الارتفاع / 2) */
 }
 
+/* (مُعدل) حاوية اللوحة - هذا هو الإصلاح الرئيسي */
 #game-board-container {
-    display: flex; 
+    display: flex; /* <-- هذا هو الأمر الأهم: ترتيب الأعمدة أفقياً */
+    flex-direction: row; /* (افتراضي، لكن للتأكيد) */
     justify-content: center;
     align-items: center;
     padding: 20px;
-    margin-top: calc(var(--hex-vertical-offset) * -1); 
+    /* سحب اللوحة للأعلى قليلاً لتبدو متناسقة */
+    margin-top: -30px; 
 }
 
+/* (مُعدل) تصميم العمود */
 .hex-column {
     display: flex;
-    flex-direction: column; 
-    margin: 0 var(--hex-horizontal-overlap); 
+    flex-direction: column;
+    /* (مُعدل) استخدام هامش أفقي صحيح للتداخل */
+    margin-left: var(--hex-horizontal-overlap);
+    margin-right: var(--hex-horizontal-overlap);
 }
 
+/* (مُعدل) إزاحة الأعمدة "الزوجية" (الثاني، الرابع، السادس) */
 .hex-column:nth-child(even) {
+    /* هذا هو سر الترتيب السداسي */
     margin-top: var(--hex-vertical-offset); 
 }
 
+/* (مُعدل) تصميم الخلية السداسية الأساسية */
 .hex-cell {
-    position: relative; /* (مهم) أضفناه في خطوة سابقة */
+    position: relative;
     width: var(--hex-width);
     height: var(--hex-height);
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    margin-bottom: var(--hex-vertical-overlap); 
+    /* (مُعدل) استخدام هامش عمودي صحيح للتداخل */
+    margin-top: var(--hex-vertical-overlap);
+    
     transition: transform 0.2s ease, filter 0.2s ease;
 }
+/* إصلاح أول خلية في كل عمود لعدم وجود هامش علوي مزدوج */
+.hex-column .hex-cell:first-child {
+    margin-top: 0;
+}
 
-/* (تم التعديل) 
-  إصلاح جميع مسارات الصور بإزالة '../'
-*/
+
+/* (مُعدل) إصلاح جميع مسارات الصور (تم في المرة السابقة) */
 .hex-cell-default {
     background-image: url('assets/images/hex.cell.default.png');
 }
@@ -273,7 +297,7 @@ body.light-mode {
     cursor: pointer;
 }
 
-/* ===== 8. تصميم هيدر اللعبة (Scoreboards & Logo) ===== */
+/* ===== 8. (مُعدل) تصميم هيدر اللعبة (Scoreboards & Logo) ===== */
 .game-header {
     display: flex;
     justify-content: space-around;
@@ -284,10 +308,10 @@ body.light-mode {
     z-index: 10;
 }
 
+/* (مُعدل) تكبير حجم لوحة النتائج */
 .scoreboard-container {
-    width: 250px; 
-    height: 120px; 
-    /* (تم التعديل) */
+    width: 350px; /* <-- تم التكبير */
+    height: 160px; /* <-- تم التكبير */
     background-image: url('assets/images/scoreboard.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -307,11 +331,11 @@ body.light-mode {
 }
 
 .team-name {
-    font-size: 1.5rem;
+    font-size: 1.8rem; /* <-- تم التكبير */
     font-weight: bold;
 }
 .score {
-    font-size: 2.5rem;
+    font-size: 3rem; /* <-- تم التكبير */
     font-weight: bold;
     color: var(--color-yellow);
 }
@@ -330,7 +354,6 @@ body.light-mode {
     opacity: 0.3; 
 }
 
-/* (تم التعديل) */
 #turn-indicator-left {
     background-image: url('assets/images/turn.indicator.to.left.png');
 }
@@ -378,7 +401,6 @@ body.light-mode {
     font-family: var(--font-primary);
     font-size: 1.2rem;
     padding: 10px 20px;
-    /* (تم التعديل) */
     background-image: url('assets/images/ui.button.show.answer.png');
     background-size: 100% 100%;
     border: none;
@@ -421,7 +443,6 @@ body.light-mode {
     margin: 0 10px;
 }
 
-/* (تم التعديل) */
 #team-purple-win-button {
     background-image: url('assets/images/ui.purple.team.png');
 }
@@ -521,9 +542,9 @@ body.light-mode {
     transform: scale(1.05);
 }
 
-/* (جديد) تصميم أزرار التحكم باللعبة */
+/* ===== 13. (مُعدل) تصميم أزرار التحكم باللعبة ===== */
 .game-controls {
-    position: fixed;
+    position: fixed; /* <-- هذا هو الأمر الأهم */
     bottom: 20px;
     left: 20px;
     z-index: 500;
