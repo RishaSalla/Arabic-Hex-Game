@@ -21,13 +21,13 @@
     --hex-height: 104px; 
     
     /* (إصلاح التباعد) تداخل عمودي (75% من الارتفاع) */
-    --hex-vertical-overlap: -8px; /* (height * 0.25) بالسالب */
+    --hex-vertical-overlap: -5px; /* (height * 0.25) بالسالب */
     
     /* (إصلاح التباعد) إزاحة أفقية (50% من العرض) */
-    --hex-horizontal-offset: 25px; /* (width * 0.5) */
+    --hex-horizontal-offset: 20px; /* (width * 0.5) */
     
     /* (إصلاح التباعد) تداخل أفقي (75% من العرض) */
-    --hex-horizontal-overlap: -8px; /* (width * 0.25) بالسالب */
+    --hex-horizontal-overlap: -5px; /* (width * 0.25) بالسالب */
 }
 
 body {
@@ -214,11 +214,11 @@ body.light-mode {
 .start-button:hover { transform: scale(1.05); }
 
 /* ================================
-    7. لوحة اللعبة (Game Board) - (إصلاح "مدبب الرأس" و "التلاصق")
+    7. لوحة اللعبة (Game Board) - (إصلاح "الخلية الأولى")
 ================================ */
 #game-board-container {
     display: flex;
-    flex-direction: column; /* نرتب الصفوف عمودياً */
+    flex-direction: column; 
     justify-content: center;
     align-items: center; 
     margin-top: -30px; 
@@ -229,11 +229,10 @@ body.light-mode {
     display: flex;
     flex-direction: row;
     justify-content: center; 
-    /* (إصلاح التباعد) تداخل عمودي بين الصفوف */
     margin-top: var(--hex-vertical-overlap);
 }
 
-/* (إصلاح التباعد) إزاحة الصفوف "الزوجية" أفقياً */
+/* إزاحة الصفوف "الزوجية" أفقياً */
 .hex-row:nth-child(even) {
     margin-left: var(--hex-horizontal-offset); 
 }
@@ -246,22 +245,23 @@ body.light-mode {
     background-position: center;
     background-repeat: no-repeat;
     
-    /* (إصلاح التباعد) تداخل أفقي بين الخلايا في نفس الصف */
+    /* (تم التعديل) قاعدة موحدة لحل مشكلة "الخلية الأولى" */
+    /* كل خلية (ما عدا الأولى) تسحب نفسها لليسار */
     margin-left: var(--hex-horizontal-overlap);
-    margin-right: var(--hex-horizontal-overlap);
     
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-/* (إصلاح التباعد) إصلاح التداخل لأول صف وأول خلية */
+/* أول صف لا يحتاج هامش علوي */
 .hex-row:first-child {
     margin-top: 0;
 }
-.hex-row .hex-cell:first-child { 
+/* أول خلية في الصف لا تحتاج هامش أيسر */
+.hex-cell:first-child { 
     margin-left: 0; 
-    margin-right: 0; 
 }
 
+/* (باقي الكود كما هو) */
 .hex-cell-default { background-image: url('assets/images/hex.cell.default.png'); }
 .hex-cell-red { background-image: url('assets/images/hex.red.png'); }
 .hex-cell-purple { background-image: url('assets/images/hex.purple.png'); }
