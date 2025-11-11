@@ -43,13 +43,25 @@ const questionCache = {};
 let usedQuestions = {};
 let currentClickedCell = null;
 let currentQuestion = null;
-let gameActive = true; // (جديد) للتحكم في تجميد اللوحة
-let scores = { purple: 0, red: 0 }; // (جديد) لتتبع نتيجة الجولات
+let gameActive = true; 
+let scores = { purple: 0, red: 0 };
 
 // --- قائمة الحروف الأساسية ---
 const ALL_LETTERS = [
-    { id: '01alif', char: 'أ' }, { id: '02ba', char: 'ب' }, // ... (باقي الحروف) ...
-    { id: '28ya', char: 'ي' }
+    { id: '01alif', char: 'أ' }, { id: '02ba', char: 'ب' }, 
+    { id: '03ta', char: 'ت' }, { id: '04tha', char: 'ث' },
+    { id: '05jeem', char: 'ج' }, { id: '06ha', char: 'ح' },
+    { id: '07kha', char: 'خ' }, { id: '08dal', char: 'د' },
+    { id: '09thal', char: 'ذ' }, { id: '10ra', char: 'ر' },
+    { id: '11za', char: 'ز' }, { id: '12seen', char: 'س' },
+    { id: '13sheen', char: 'ش' }, { id: '14sad', char: 'ص' },
+    { id: '15dad', char: 'ض' }, { id: '16ta', char: 'ط' },
+    { id: '17za', char: 'ظ' }, { id: '18ain', char: 'ع' },
+    { id: '19ghain', char: 'غ' }, { id: '20fa', char: 'ف' },
+    { id: '21qaf', char: 'ق' }, { id: '22kaf', char: 'ك' },
+    { id: '23lam', char: 'ل' }, { id: '24meem', char: 'م' },
+    { id: '25noon', char: 'ن' }, { id: '26ha', char: 'ه' },
+    { id: '27waw', char: 'و' }, { id: '28ya', char: 'ي' }
 ];
 
 // --- الوظائف (Functions) ---
@@ -91,7 +103,6 @@ function startGame() {
     mainMenuScreen.classList.remove('active');
     gameScreen.classList.add('active');
     
-    // (جديد) إعادة تعيين النقاط عند بدء لعبة جديدة (وليس جولة جديدة)
     scores = { purple: 0, red: 0 };
     updateScoreboard();
 
@@ -101,62 +112,73 @@ function startGame() {
 
 /** 5. (جديد) بدء جولة جديدة */
 function startNewRound() {
-    gameActive = true; // تفعيل اللوحة
-    roundWinOverlay.style.display = 'none'; // إخفاء شاشة الفوز
-    initializeGameBoard(); // بناء اللوحة من جديد
-    TurnManager.startGame(); // بدء مدير الأدوار
+    gameActive = true; 
+    roundWinOverlay.style.display = 'none'; 
+    initializeGameBoard(); 
+    TurnManager.startGame(); 
 }
 
-/** 6. بناء لوحة اللعب */
+/** 6. بناء لوحة اللعب (7×7 حسب توزيعك) */
 function initializeGameBoard() {
-    // ... (الكود كما هو - بناء اللوحة وتوزيع الحروف) ...
     gameBoardContainer.innerHTML = '';
     const shuffledLetters = shuffleArray(ALL_LETTERS);
     const gameLetters = shuffledLetters.slice(0, 25);
     let letterIndex = 0;
 
-    for (let col = 0; col < 7; col++) {
+    const layout = [
+        ['dark','red','red','red','red','dark'],             // صف 1
+        ['purple','default','default','default','default','default','purple'], // صف 2
+        ['purple','default','default','default','default','default','purple'], // صف 3
+        ['purple','default','default','default','default','default','purple'], // صف 4
+        ['purple','default','default','default','default','default','purple'], // صف 5
+        ['purple','default','default','default','default','default','purple'], // صف 6
+        ['dark','red','red','red','red','dark']              // صف 7
+    ];
+
+    layout.forEach((rowData, r) => {
         const column = document.createElement('div');
         column.classList.add('hex-column');
-        for (let row = 0; row < 7; row++) {
+        rowData.forEach((cellType, c) => {
             const cell = document.createElement('div');
-            cell.classList.add('hex-cell');
-            cell.dataset.row = row;
-            cell.dataset.col = col;
+            cell.dataset.row = r;
+            cell.dataset.col = c;
 
-            if ((row === 0 || row === 6) && (col === 0 || col === 6)) {
-                cell.classList.add('hex-cell-selected');
-            } else if ((row === 0 || row === 6) && (col > 0 && col < 6)) {
-                cell.classList.add('hex-cell-red');
-            } else if ((row > 0 && row < 6) && (col === 0 || col === 6)) {
-                cell.classList.add('hex-cell-purple');
-            } else {
-                cell.classList.add('hex-cell-default', 'playable');
-                const letter = gameLetters[letterIndex];
-                cell.dataset.letterId = letter.id;
-                const letterSpan = document.createElement('span');
-                letterSpan.classList.add('hex-letter');
-                letterSpan.textContent = letter.char;
-                cell.appendChild(letterSpan);
-                letterIndex++;
-                cell.addEventListener('click', handleCellClick);
+            switch(cellType) {
+                case 'dark':
+                    cell.classList.add('hex-cell-selected');
+                    break;
+                case 'red':
+                    cell.classList.add('hex-cell-red');
+                    break;
+                case 'purple':
+                    cell.classList.add('hex-cell-purple');
+                    break;
+                case 'default':
+                    cell.classList.add('hex-cell-default','playable');
+                    const letter = gameLetters[letterIndex];
+                    cell.dataset.letterId = letter.id;
+                    const letterSpan = document.createElement('span');
+                    letterSpan.classList.add('hex-letter');
+                    letterSpan.textContent = letter.char;
+                    cell.appendChild(letterSpan);
+                    letterIndex++;
+                    cell.addEventListener('click', handleCellClick);
+                    break;
             }
             column.appendChild(cell);
-        }
+        });
         gameBoardContainer.appendChild(column);
-    }
+    });
 }
 
 /** 7. معالجة النقر على الخلية */
 async function handleCellClick(event) {
-    // (جديد) تجميد اللوحة إذا اللعبة غير نشطة
     if (!gameActive) return;
 
     const clickedCell = event.currentTarget;
     const letterId = clickedCell.dataset.letterId;
-    if (!clickedCell.classList.contains('playable')) {
-        return; 
-    }
+    if (!clickedCell.classList.contains('playable')) return;
+
     currentClickedCell = clickedCell;
     const question = await getQuestionForLetter(letterId);
     if (question) {
@@ -165,14 +187,11 @@ async function handleCellClick(event) {
         answerText.textContent = question.answer;
         answerRevealSection.style.display = 'none';
         questionModalOverlay.style.display = 'flex';
-    } else {
-        // ... (معالجة الخطأ كما هي) ...
     }
 }
 
 /** 8. جلب سؤال لحرف معين */
 async function getQuestionForLetter(letterId) {
-    // ... (الكود كما هو - منطق جلب الأسئلة) ...
     if (!questionCache[letterId]) {
         try {
             const response = await fetch(`data/questions/${letterId}.json`);
@@ -205,7 +224,7 @@ function showAnswer() {
     answerRevealSection.style.display = 'block';
 }
 
-/** 10. معالجة نتيجة السؤال (محدثة) */
+/** 10. معالجة نتيجة السؤال */
 function handleQuestionResult(result) {
     questionModalOverlay.style.display = 'none';
 
@@ -213,158 +232,111 @@ function handleQuestionResult(result) {
         usedQuestions[currentQuestion.id] = true;
         saveUsedQuestions();
     }
-    
+
     if (result === 'purple' || result === 'red') {
         const teamColor = result;
-        currentClickedCell.classList.remove('playable', 'hex-cell-default');
+        currentClickedCell.classList.remove('playable','hex-cell-default');
         currentClickedCell.classList.add(`hex-cell-${teamColor}-owned`);
-        
-        // --- (جديد) التحقق من الفوز ---
         if (checkWinCondition(teamColor)) {
             handleGameWin(teamColor);
-            return; // توقف، لا تنقل الدور
+            return;
         }
     }
-    
+
     TurnManager.nextTurn(result);
     currentClickedCell = null;
     currentQuestion = null;
 }
 
-/** 11. (جديد) وظيفة جلب خلية بواسطة الإحداثيات */
-function getCell(r, c) {
+/** 11. جلب خلية بواسطة الإحداثيات */
+function getCell(r,c) {
     return document.querySelector(`.hex-cell[data-row="${r}"][data-col="${c}"]`);
 }
 
-/** 12. (جديد) وظيفة جلب الجيران للخلية */
-function getNeighbors(r, c) {
+/** 12. جلب الجيران */
+function getNeighbors(r,c) {
     r = parseInt(r);
     c = parseInt(c);
     
     let neighbors = [];
-    
-    // تحديد الجيران بناءً على إزاحة العمود (فردي أم زوجي)
     const isOddCol = c % 2 !== 0;
 
-    if (isOddCol) { // عمود فردي (1, 3, 5) - (مزاح للأسفل)
+    if (isOddCol) {
         neighbors = [
-            [r - 1, c],     // أعلى
-            [r + 1, c],     // أسفل
-            [r, c - 1],     // أعلى-يسار
-            [r + 1, c - 1], // أسفل-يسار
-            [r, c + 1],     // أعلى-يمين
-            [r + 1, c + 1]  // أسفل-يمين
+            [r-1,c],[r+1,c],[r,c-1],[r+1,c-1],[r,c+1],[r+1,c+1]
         ];
-    } else { // عمود زوجي (0, 2, 4, 6)
+    } else {
         neighbors = [
-            [r - 1, c],     // أعلى
-            [r + 1, c],     // أسفل
-            [r - 1, c - 1], // أعلى-يسار
-            [r, c - 1],     // أسفل-يسار
-            [r - 1, c + 1], // أعلى-يمين
-            [r, c + 1]      // أسفل-يمين
+            [r-1,c],[r+1,c],[r-1,c-1],[r,c-1],[r-1,c+1],[r,c+1]
         ];
     }
 
-    // فلترة الجيران لضمان أنهم داخل اللوحة (0-6)
-    return neighbors.filter(([nr, nc]) => 
-        nr >= 0 && nr <= 6 && nc >= 0 && nc <= 6
-    );
+    return neighbors.filter(([nr,nc]) => nr>=0 && nr<=6 && nc>=0 && nc<=6);
 }
 
-/** 13. (جديد) وظيفة التحقق من الفوز */
+/** 13. التحقق من الفوز */
 function checkWinCondition(teamColor) {
-    const visited = new Set(); // لتتبع الخلايا التي تمت زيارتها
-    const queue = []; // (Queue) للبحث (BFS)
-    
-    const startRow = (teamColor === 'red') ? 0 : 1;
-    const endRow = (teamColor === 'red') ? 6 : 5;
-    const startCol = (teamColor === 'purple') ? 0 : 1;
-    const endCol = (teamColor === 'purple') ? 6 : 5;
-    
-    const targetRow = (teamColor === 'red') ? 6 : -1; // -1 يعني لا يهم
-    const targetCol = (teamColor === 'purple') ? 6 : -1;
+    const visited = new Set();
+    const queue = [];
 
-    // 1. إضافة كل خلايا البداية إلى الـ Queue
-    if (teamColor === 'red') {
-        for (let c = 1; c <= 5; c++) {
-            const cell = getCell(1, c);
-            if (cell && cell.classList.contains('hex-cell-red-owned')) {
-                queue.push([1, c]);
-                visited.add(`1,${c}`);
+    if (teamColor==='red'){
+        for(let c=1;c<=4;c++){
+            const cell = getCell(0,c);
+            if(cell && cell.classList.contains('hex-cell-red-owned')){
+                queue.push([0,c]);
+                visited.add(`0,${c}`);
             }
         }
-    } else { // 'purple'
-        for (let r = 1; r <= 5; r++) {
-            const cell = getCell(r, 1);
-            if (cell && cell.classList.contains('hex-cell-purple-owned')) {
-                queue.push([r, 1]);
-                visited.add(`${r},1`);
+    } else {
+        for(let r=1;r<=5;r++){
+            const cell = getCell(r,0);
+            if(cell && cell.classList.contains('hex-cell-purple-owned')){
+                queue.push([r,0]);
+                visited.add(`${r},0`);
             }
         }
     }
 
-    // 2. بدء البحث (BFS)
-    while (queue.length > 0) {
-        const [r, c] = queue.shift();
-
-        // 3. التحقق من الوصول للهدف
-        // (هل الخلية الحالية متصلة بالطرف الآخر؟)
-        const neighbors = getNeighbors(r, c);
-        for (const [nr, nc] of neighbors) {
-            if (teamColor === 'red' && nr === 6) { // الوصول للحد السفلي
-                return true;
-            }
-            if (teamColor === 'purple' && nc === 6) { // الوصول للحد الأيمن
-                return true;
-            }
-            
-            // 4. مواصلة البحث
-            const neighborCell = getCell(nr, nc);
-            if (neighborCell && 
-                !visited.has(`${nr},${nc}`) &&
-                neighborCell.classList.contains(`hex-cell-${teamColor}-owned`)) 
-            {
+    while(queue.length>0){
+        const [r,c] = queue.shift();
+        const neighbors = getNeighbors(r,c);
+        for(const [nr,nc] of neighbors){
+            if(teamColor==='red' && nr===6) return true;
+            if(teamColor==='purple' && nc===6) return true;
+            const neighborCell = getCell(nr,nc);
+            if(neighborCell && !visited.has(`${nr},${nc}`) && neighborCell.classList.contains(`hex-cell-${teamColor}-owned`)){
                 visited.add(`${nr},${nc}`);
-                queue.push([nr, nc]);
+                queue.push([nr,nc]);
             }
         }
     }
-    
-    return false; // لم يتم العثور على مسار
+
+    return false;
 }
 
-/** 14. (جديد) وظيفة معالجة الفوز بالجولة */
-function handleGameWin(teamColor) {
-    gameActive = false; // تجميد اللوحة
-    
-    // تحديث النتيجة
+/** 14. معالجة الفوز بالجولة */
+function handleGameWin(teamColor){
+    gameActive=false;
     scores[teamColor]++;
     updateScoreboard();
-
-    // إظهار رسالة الفوز
-    winMessage.textContent = (teamColor === 'red') ? 'الفريق الأحمر فاز بالجولة!' : 'الفريق البنفسجي فاز بالجولة!';
+    winMessage.textContent = (teamColor==='red')?'الفريق الأحمر فاز بالجولة!':'الفريق البنفسجي فاز بالجولة!';
     winScorePurple.textContent = scores.purple;
     winScoreRed.textContent = scores.red;
-    
-    roundWinOverlay.style.display = 'flex'; // إظهار شاشة الفوز
+    roundWinOverlay.style.display='flex';
 }
 
-/** 15. (جديد) وظيفة تحديث لوحة النتائج الرئيسية */
-function updateScoreboard() {
+/** 15. تحديث لوحة النتائج */
+function updateScoreboard(){
     purpleScoreDisplay.textContent = scores.purple;
     redScoreDisplay.textContent = scores.red;
 }
 
-// --- ربط الأحداث (Event Listeners) ---
-settingButtons.forEach(button => {
-    button.addEventListener('click', handleSettingClick);
-});
-
+// --- ربط الأحداث ---
+settingButtons.forEach(button=>{ button.addEventListener('click', handleSettingClick); });
 startGameButton.addEventListener('click', startGame);
-nextRoundButton.addEventListener('click', startNewRound); // (جديد)
+nextRoundButton.addEventListener('click', startNewRound);
 
 showAnswerButton.addEventListener('click', showAnswer);
-teamPurpleWinButton.addEventListener('click', () => handleQuestionResult('purple'));
-teamRedWinButton.addEventListener('click', () => handleQuestionResult('red'));
-skipQuestionButton.addEventListener('click', () => handleQuestionResult('skip'));
+teamPurpleWinButton.addEventListener('click', ()=>handleQuestionResult('purple'));
+teamRedWinButton.addEventListener('click', ()=>handleQuestionResult('red'));
+skipQuestionButton.addEventListener('click', ()=>handleQuestionResult('skip'));
