@@ -1,7 +1,7 @@
-<style>
 /* ===== 1. إعدادات عامة (Global) ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
 
+/* (تم الإصلاح) دمج كل المتغيرات في كتلة واحدة */
 :root {
     --font-primary: 'Cairo', sans-serif;
     --color-dark-bg: #1a1a2e;
@@ -12,8 +12,8 @@
     --color-red: #c0392b;
     --color-grey: #bdc3c7;
     --color-yellow: #f1c40f;
-
-    /* (هذه هي الإضافة المُصححة) متغيرات الخلايا السداسية */
+    
+    /* متغيرات الخلايا السداسية (مدمجة هنا) */
     --hex-width: 90px;
     --hex-height: 104px; 
     --hex-vertical-overlap: -26px;
@@ -216,9 +216,7 @@ body.light-mode {
     transform: scale(1.05);
 }
 
-/* ===== 7. (مُعدل) تصميم ساحة اللعب (Game Board) ===== */
-
-/* (هذا هو الكود الذي كان مكسوراً وتم إصلاحه) */
+/* ===== 7. تصميم ساحة اللعب (Game Board) ===== */
 #game-board-container {
     display: flex; 
     flex-direction: row; 
@@ -249,7 +247,7 @@ body.light-mode {
     margin-top: var(--hex-vertical-overlap);
     transition: transform 0.2s ease, filter 0.2s ease;
 }
-
+    
 .hex-column .hex-cell:first-child {
     margin-top: 0;
 }
@@ -273,7 +271,7 @@ body.light-mode {
     cursor: pointer;
 }
 
-/* ===== 8. (مُعدل) تصميم هيدر اللعبة (Scoreboards & Logo) ===== */
+/* ===== 8. تصميم هيدر اللعبة (Scoreboards & Logo) ===== */
 .game-header {
     display: flex;
     justify-content: space-around;
@@ -541,4 +539,3 @@ body.light-mode {
 .game-controls button:hover {
     background-color: rgba(255, 255, 255, 0.4);
 }
-</style>
