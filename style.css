@@ -496,3 +496,54 @@ body.light-mode {
     color: white;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* ظل غامق */
 }
+
+/* ===== 12. تصميم شاشة الفوز بالجولة ===== */
+#round-win-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(26, 26, 46, 0.85); /* 85% opacity of dark-bg */
+    display: none; /* مخفي افتراضياً */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 2000;
+    backdrop-filter: blur(5px); /* تأثير ضبابي جميل للخلفية */
+}
+
+.win-content {
+    text-align: center;
+    color: white;
+}
+
+#win-message {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--color-yellow);
+    text-shadow: 0 0 10px var(--color-yellow);
+}
+
+.score-update {
+    font-size: 4rem;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+#next-round-button {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--color-yellow);
+    color: var(--color-dark-bg);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#next-round-button:hover {
+    transform: scale(1.05);
+}
