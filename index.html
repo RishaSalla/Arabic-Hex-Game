@@ -9,12 +9,10 @@
 </head>
 <body class="dark-mode"> 
 
-    <!-- شاشة تدوير الجهاز -->
     <div id="rotate-device-overlay">
         <p>لتجربة لعب أفضل، الرجاء تدوير جهازك</p>
     </div>
 
-    <!-- شاشة الأمان / إدخال الكود -->
     <main id="security-screen" class="screen active">
         <div class="login-container">
             <img src="assets/images/logo.hrof.png" alt="Logo" class="login-logo">
@@ -25,7 +23,6 @@
         </div>
     </main>
 
-    <!-- شاشة القائمة الرئيسية -->
     <div id="main-menu-screen" class="screen">
         <h2>إعدادات اللعبة</h2>
         
@@ -51,10 +48,8 @@
         <button id="instructions-button">التعليمات</button>
     </div>
 
-    <!-- شاشة اللعبة -->
     <div id="game-screen" class="screen">
         
-        <!-- الهيدر: اللوغو + مؤشرات الدور + لوحة النتائج -->
         <header class="game-header">
             <div id="team-purple-scoreboard" class="scoreboard-container left">
                 <span class="score" id="purple-score">0</span>
@@ -72,16 +67,13 @@
             </div>
         </header>
 
-        <!-- لوحة اللعبة -->
         <div id="game-board-container"></div>
 
-        <!-- أزرار التحكم -->
         <div class="game-controls">
             <button id="exit-game-button">الخروج للقائمة</button>
             <button id="toggle-theme-button">تبديل الوضع (فاتح)</button>
         </div>
 
-        <!-- نافذة السؤال -->
         <div id="question-modal-overlay">
             <div class="modal-content">
                 <h3 id="question-text">نص السؤال سيظهر هنا...</h3>
@@ -99,7 +91,6 @@
             </div>
         </div>
 
-        <!-- شاشة الفوز بالجولة -->
         <div id="round-win-overlay">
             <div class="win-content">
                 <h2 id="win-message">الفريق الأحمر فاز بالجولة!</h2>
@@ -112,7 +103,6 @@
 
     </div>
 
-    <!-- سكربتات اللعبة -->
     <script src="js/security.js" type="module"></script>
     <script src="js/turn_manager.js" type="module"></script>
     <script src="js/game.js" type="module"></script>
