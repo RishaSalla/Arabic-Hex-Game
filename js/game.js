@@ -46,7 +46,7 @@ let currentQuestion = null;
 let gameActive = true; 
 let scores = { purple: 0, red: 0 };
 
-// --- قائمة الحروف الأساسية ---
+// --- (تم الإصلاح) قائمة الحروف الأساسية بالأسماء الصحيحة ---
 const ALL_LETTERS = [
     { id: '01alif', char: 'أ' }, { id: '02ba', char: 'ب' }, { id: '03ta', char: 'ت' },
     { id: '04tha', char: 'ث' }, { id: '05jeem', char: 'ج' }, { id: '06haa', char: 'ح' },
@@ -60,15 +60,23 @@ const ALL_LETTERS = [
     { id: '28ya', char: 'ي' }
 ];
 
-// --- هيكل اللوحة (47 خلية) ---
+// --- (تم التعديل) هيكل اللوحة (47 خلية + خلايا شفافة) ---
+const T = 'transparent'; // خلية شفافة
+const G = 'default';     // خلية لعب رمادية
+const R = 'red';         // خلية موصل أحمر
+const P = 'purple';      // خلية موصل بنفسجي
+const D = 'dark';        // خلية زاوية داكنة
+
 const BOARD_LAYOUT = [
-    ['dark','red','red','red','red','dark'],             // صف 0 (6 خلايا)
-    ['purple','default','default','default','default','default','purple'], // صف 1 (7 خلايا)
-    ['purple','default','default','default','default','default','purple'], // صف 2 (7 خلايا)
-    ['purple','default','default','default','default','default','purple'], // صف 3 (7 خلايا)
-    ['purple','default','default','default','default','default','purple'], // صف 4 (7 خلايا)
-    ['purple','default','default','default','default','default','purple'], // صف 5 (7 خلايا)
-    ['dark','red','red','red','red','dark']              // صف 6 (6 خلايا)
+    [T, T, T, T, T, T, T, T, T], // صف 0: شفاف
+    [T, D, R, R, R, R, D, T], // صف 1: (الصف 0 القديم + حشو)
+    [T, P, G, G, G, G, G, P, T], // صف 2: (الصف 1 القديم + حشو)
+    [T, P, G, G, G, G, G, P, T], // صف 3: (الصف 2 القديم + حشو)
+    [T, P, G, G, G, G, G, P, T], // صف 4: (الصف 3 القديم + حشو)
+    [T, P, G, G, G, G, G, P, T], // صف 5: (الصف 4 القديم + حشو)
+    [T, P, G, G, G, G, G, P, T], // صف 6: (الصف 5 القديم + حشو)
+    [T, D, R, R, R, R, D, T], // صف 7: (الصف 6 القديم + حشو)
+    [T, T, T, T, T, T, T, T, T]  // صف 8: شفاف
 ];
 
 
@@ -126,17 +134,16 @@ function startNewRound() {
     TurnManager.startGame(); 
 }
 
-/** 6. (تم التعديل) بناء لوحة اللعب كـ "صفوف" */
+/** 6. (تم التعديل) بناء لوحة اللعب بالخلايا الشفافة */
 function initializeGameBoard() {
     gameBoardContainer.innerHTML = '';
     const shuffledLetters = shuffleArray(ALL_LETTERS);
     const gameLetters = shuffledLetters.slice(0, 25);
     let letterIndex = 0;
 
-    // (تعديل) بناء صفوف بدلاً من أعمدة
     BOARD_LAYOUT.forEach((rowData, r) => {
-        const row = document.createElement('div'); // (تعديل)
-        row.classList.add('hex-row'); // (تعديل)
+        const row = document.createElement('div');
+        row.classList.add('hex-row');
         
         rowData.forEach((cellType, c) => {
             const cell = document.createElement('div');
@@ -145,16 +152,16 @@ function initializeGameBoard() {
             cell.dataset.col = c;
 
             switch(cellType) {
-                case 'dark':
+                case D: // 'dark'
                     cell.classList.add('hex-cell-selected');
                     break;
-                case 'red':
+                case R: // 'red'
                     cell.classList.add('hex-cell-red');
                     break;
-                case 'purple':
+                case P: // 'purple'
                     cell.classList.add('hex-cell-purple');
                     break;
-                case 'default':
+                case G: // 'default'
                     cell.classList.add('hex-cell-default','playable');
                     
                     if (letterIndex < gameLetters.length) {
@@ -169,10 +176,13 @@ function initializeGameBoard() {
                     
                     cell.addEventListener('click', handleCellClick);
                     break;
+                case T: // (جديد) 'transparent'
+                    cell.classList.add('hex-cell-transparent');
+                    break;
             }
-            row.appendChild(cell); // (تعديل)
+            row.appendChild(cell);
         });
-        gameBoardContainer.appendChild(row); // (تعديل)
+        gameBoardContainer.appendChild(row);
     });
 }
 
@@ -183,7 +193,7 @@ async function handleCellClick(event) {
 
     const clickedCell = event.currentTarget;
     const letterId = clickedCell.dataset.letterId;
-    if (!clickedCell.classList.contains('playable')) return;
+    if (!clickedCell.classList.contains('playable')) return; // سيمنع النقر على الشفاف
 
     currentClickedCell = clickedCell;
     const question = await getQuestionForLetter(letterId);
@@ -266,15 +276,15 @@ function getCell(r,c) {
     return document.querySelector(`.hex-cell[data-row="${r}"][data-col="${c}"]`);
 }
 
-/** 12. (تم التعديل) جلب الجيران (لتوجيه مدبب الرأس) */
+/** 12. (تم التعديل) جلب الجيران (مع تجاهل الخلايا الشفافة) */
 function getNeighbors(r, c) {
     r = parseInt(r);
     c = parseInt(c);
     
     let potentialNeighbors = [];
-    const isOddRow = r % 2 !== 0; // (تعديل) نعتمد على الصف الفردي/الزوجي
+    const isOddRow = r % 2 !== 0; 
 
-    if (isOddRow) { // صف فردي (1, 3, 5) - (مزاح لليمين)
+    if (isOddRow) { // صف فردي
         potentialNeighbors = [
             [r, c - 1],     // يسار
             [r, c + 1],     // يمين
@@ -283,7 +293,7 @@ function getNeighbors(r, c) {
             [r + 1, c],     // أسفل-يسار
             [r + 1, c + 1]  // أسفل-يمين
         ];
-    } else { // صف زوجي (0, 2, 4, 6)
+    } else { // صف زوجي
         potentialNeighbors = [
             [r, c - 1],     // يسار
             [r, c + 1],     // يمين
@@ -294,34 +304,37 @@ function getNeighbors(r, c) {
         ];
     }
 
-    // فلترة الجيران بناءً على هيكل اللوحة الفعلي (47 خلية)
+    // (الإصلاح الحاسم)
+    // فلترة الجيران بناءً على هيكل اللوحة الفعلي
     return potentialNeighbors.filter(([nr, nc]) => {
-        return BOARD_LAYOUT[nr] && BOARD_LAYOUT[nr][nc] !== undefined;
+        return BOARD_LAYOUT[nr] && 
+               BOARD_LAYOUT[nr][nc] !== undefined &&
+               BOARD_LAYOUT[nr][nc] !== T; // تجاهل الخلايا الشفافة
     });
 }
 
 
-/** 13. التحقق من الفوز (صحيح لـ 47 خلية) */
+/** 13. (تم التعديل) التحقق من الفوز (بناءً على الإحداثيات الجديدة) */
 function checkWinCondition(teamColor) {
     const visited = new Set();
     const queue = [];
 
     if (teamColor==='red'){
-        // البدء من الصف 0، الخلايا 1 إلى 4 (4 خلايا حمراء)
-        for(let c=1; c<=4; c++){
-            const cell = getCell(0,c);
+        // البدء من الصف 1، الخلايا 2 إلى 5 (4 خلايا حمراء)
+        for(let c=2; c<=5; c++){
+            const cell = getCell(1,c); // (تعديل)
             if(cell && cell.classList.contains('hex-cell-red-owned')){
-                queue.push([0,c]);
-                visited.add(`0,${c}`);
+                queue.push([1,c]); // (تعديل)
+                visited.add(`1,${c}`); // (تعديل)
             }
         }
     } else {
-        // البدء من العمود 0، الصفوف 1 إلى 5 (5 خلايا بنفسجية)
-        for(let r=1; r<=5; r++){
-            const cell = getCell(r,0);
+        // البدء من العمود 1، الصفوف 2 إلى 6 (5 خلايا بنفسجية)
+        for(let r=2; r<=6; r++){ // (تعديل)
+            const cell = getCell(r,1); // (تعديل)
             if(cell && cell.classList.contains('hex-cell-purple-owned')){
-                queue.push([r,0]);
-                visited.add(`${r},0`);
+                queue.push([r,1]); // (تعديل)
+                visited.add(`${r},1`); // (تعديل)
             }
         }
     }
@@ -333,8 +346,8 @@ function checkWinCondition(teamColor) {
         
         for(const [nr,nc] of neighbors){
             // التحقق من الوصول للطرف الآخر
-            if(teamColor==='red' && nr===6) return true; // الوصول للصف 6
-            if(teamColor==='purple' && nc===6) return true; // الوصول للعمود 6
+            if(teamColor==='red' && nr===7) return true; // الوصول للصف 7 (تعديل)
+            if(teamColor==='purple' && nc===7) return true; // الوصول للعمود 7 (تعديل)
             
             const neighborCell = getCell(nr,nc);
             if(neighborCell && !visited.has(`${nr},${nc}`) && 
