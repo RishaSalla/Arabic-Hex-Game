@@ -20,9 +20,9 @@
     /* هذه هي القيم الصحيحة والمحسوبة لشبكة متلاصقة */
     --hex-width: 90px;
     --hex-height: 104px; 
-    --hex-vertical-overlap: -26px; /* (height / 4) بالسالب */
-    --hex-horizontal-offset: 45px; /* (width / 2) */
-    --hex-horizontal-overlap: -22.5px; /* (width / 4) بالسالب */
+    --hex-vertical-overlap: -35px; /* (height / 4) بالسالب */
+    --hex-horizontal-offset: 80px; /* (width / 2) */
+    --hex-horizontal-overlap: -4px; /* (width / 4) بالسالب */
 }
 
 body {
