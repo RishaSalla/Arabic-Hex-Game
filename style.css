@@ -411,9 +411,6 @@ body.light-mode {
 /* ================================
     11. الخلايا المملوكة (Owned Cells) - (إصلاح مشكلة المربع)
 ================================ */
-/* (تعديل) لن نستخدم 'background-image: none' 
-   بل سنستبدل الصورة بالصورة الملونة
-*/
 .hex-cell-purple-owned { 
     background-image: url('assets/images/hex.purple.png') !important; 
 }
@@ -421,7 +418,6 @@ body.light-mode {
     background-image: url('assets/images/hex.red.png') !important; 
 }
 
-/* (تعديل) تغيير لون الحرف ليناسب الخلفية الملونة */
 .hex-cell-purple-owned .hex-letter,
 .hex-cell-red-owned .hex-letter { 
     color:white; 
@@ -483,4 +479,13 @@ body.light-mode {
 }
 .game-controls button:hover {
     background-color: rgba(255,255,255,0.4);
+}
+
+/* ================================
+    14. (جديد) الخلايا الشفافة
+================================ */
+.hex-cell-transparent {
+    background-image: none !important;
+    opacity: 0;
+    pointer-events: none; /* لا يمكن النقر عليها */
 }
