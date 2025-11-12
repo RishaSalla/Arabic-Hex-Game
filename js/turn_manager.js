@@ -1,5 +1,4 @@
-// --- (جديد) استيراد الإعدادات من game.js ---
-import { gameSettings } from './game.js';
+// --- (تم الحذف) لا يوجد استيراد من game.js لكسر الحلقة ---
 
 // --- العناصر (Elements) ---
 const turnIndicatorLeft = document.getElementById('turn-indicator-left');
@@ -7,16 +6,21 @@ const turnIndicatorRight = document.getElementById('turn-indicator-right');
 
 // --- حالة المدير (Manager State) ---
 const state = {
-    currentPlayer: 'purple' // من سيبدأ اللعبة
+    currentPlayer: 'purple', // من سيبدأ اللعبة
+    gameMode: 'turns' // (جديد) سنحفظ الوضع هنا
 };
 
 /**
  * 1. وظيفة بدء إدارة الأدوار
+ * (تم التعديل) تستقبل الإعدادات من game.js
  */
-function startGame() {
-    state.currentPlayer = 'purple';
+function startGame(gameSettings) {
+    state.gameMode = gameSettings.mode; // (جديد) حفظ الوضع
+    
+    // (تم إصلاح الترتيب) الأحمر يساراً، البنفسجي يميناً
+    state.currentPlayer = 'red'; 
 
-    if (gameSettings.mode === 'competitive') {
+    if (state.gameMode === 'competitive') {
         state.currentPlayer = 'all'; 
     }
     
@@ -25,17 +29,18 @@ function startGame() {
 
 /**
  * 2. وظيفة الانتقال للدور التالي
+ * (تم التعديل) تستقبل الإعدادات من game.js
  */
 function nextTurn(result) {
-    if (gameSettings.mode === 'competitive') {
+    if (state.gameMode === 'competitive') {
         state.currentPlayer = 'all';
         return;
     }
 
-    if (gameSettings.mode === 'turns') {
-        // (تم التعديل) ينتقل الدور فقط إذا كانت النتيجة من وضع الأدوار
+    if (state.gameMode === 'turns') {
+        // (تم إصلاح الترتيب)
         if (result === 'turn_correct' || result === 'turn_skip') {
-            state.currentPlayer = (state.currentPlayer === 'purple') ? 'red' : 'purple';
+            state.currentPlayer = (state.currentPlayer === 'red') ? 'purple' : 'red';
         }
     }
 
@@ -49,9 +54,10 @@ function updateTurnIndicator() {
     turnIndicatorLeft.classList.remove('active');
     turnIndicatorRight.classList.remove('active');
 
-    if (state.currentPlayer === 'purple') {
+    // (تم إصلاح الترتيب)
+    if (state.currentPlayer === 'red') {
         turnIndicatorLeft.classList.add('active'); 
-    } else if (state.currentPlayer === 'red') {
+    } else if (state.currentPlayer === 'purple') {
         turnIndicatorRight.classList.add('active'); 
     } else if (state.currentPlayer === 'all') {
         turnIndicatorLeft.classList.add('active');
@@ -60,15 +66,13 @@ function updateTurnIndicator() {
 }
 
 /**
- * 4. (جديد) وظيفة جلب اللاعب الحالي
- * (ليعرف game.js أي لون يمنحه للخلية في وضع الأدوار)
+ * 4. وظيفة جلب اللاعب الحالي
  */
 function getCurrentPlayer() {
     return state.currentPlayer;
 }
 
 // --- (تم التعديل) تصدير الوظائف ---
-// (تمت إضافة getCurrentPlayer)
 export const TurnManager = {
     startGame,
     nextTurn,
