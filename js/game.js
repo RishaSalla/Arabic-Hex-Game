@@ -1,35 +1,45 @@
 // --- استيراد مدير الأدوار ---
 import { TurnManager } from './turn_manager.js';
 
-// --- العناصر (Elements) ---
+// --- (تم التعديل) العناصر (Elements) ---
 const mainMenuScreen = document.getElementById('main-menu-screen');
 const gameScreen = document.getElementById('game-screen');
 const gameBoardContainer = document.getElementById('game-board-container');
 
-// (جديد) عناصر القائمة الرئيسية
+// عناصر القائمة الرئيسية
 const settingButtons = document.querySelectorAll('.setting-button');
 const startGameButton = document.getElementById('start-game-button');
-const teamNameInputs = document.getElementById('team-name-inputs');
-const team1NameInput = document.getElementById('team-1-name-input');
-const team2NameInput = document.getElementById('team-2-name-input');
 const instructionsButton = document.getElementById('instructions-button');
 const instructionsModalOverlay = document.getElementById('instructions-modal-overlay');
 const closeInstructionsButton = document.getElementById('close-instructions-button');
 
-// (جديد) عناصر شاشة اللعبة
+// (جديد) لوحات إعدادات الفرق
+const individualSettingsPanel = document.getElementById('players-individual-settings');
+const teamSettingsPanel = document.getElementById('players-team-settings');
+
+// (جديد) حقول إدخال "فردي"
+const player1NameInput = document.getElementById('player-1-name-input');
+const player2NameInput = document.getElementById('player-2-name-input');
+
+// (جديد) حقول إدخال "فريق"
+const team1NameInput = document.getElementById('team-1-name-input');
+const team2NameInput = document.getElementById('team-2-name-input');
+// (ملاحظة: حقول أسماء الأعضاء لا نحتاج لجلبها الآن إلا إذا أردنا عرضها)
+
+// عناصر شاشة اللعبة
 const rotateOverlay = document.getElementById('rotate-device-overlay');
 const closeRotateOverlay = document.getElementById('close-rotate-overlay');
 const exitGameButton = document.getElementById('exit-game-button');
 const toggleThemeButton = document.getElementById('toggle-theme-button');
 
-// (جديد) عناصر نافذة السؤال
+// عناصر نافذة السؤال
 const questionModalOverlay = document.getElementById('question-modal-overlay');
 const questionText = document.getElementById('question-text');
 const showAnswerButton = document.getElementById('show-answer-button');
 const answerRevealSection = document.getElementById('answer-reveal-section');
 const answerText = document.getElementById('answer-text');
 
-// (جديد) أزرار التحكم بالنتيجة
+// أزرار التحكم بالنتيجة
 const competitiveControls = document.getElementById('competitive-controls');
 const turnsControls = document.getElementById('turns-controls');
 const teamPurpleWinButton = document.getElementById('team-purple-win-button');
@@ -57,10 +67,10 @@ const nextRoundButton = document.getElementById('next-round-button');
 // --- تصدير إعدادات اللعبة ---
 export const gameSettings = {
     mode: 'turns',
-    teams: '2p',
+    teams: 'individual', // (تم التعديل) القيمة الافتراضية
     timer: 'off',
-    team1Name: 'الفريق البنفسجي', // (جديد)
-    team2Name: 'الفريق الأحمر'    // (جديد)
+    team1Name: 'اللاعب 1',
+    team2Name: 'اللاعب 2'
 };
 
 // --- متغيرات حالة اللعبة ---
@@ -70,10 +80,9 @@ let currentClickedCell = null;
 let currentQuestion = null;
 let gameActive = true; 
 let scores = { purple: 0, red: 0 };
-// (لم نضف منطق المؤقت الفعلي بعد)
 // let timerInterval = null; 
 
-// --- (تم الإصلاح) قائمة الحروف الأساسية بالأسماء الصحيحة ---
+// --- قائمة الحروف الأساسية ---
 const ALL_LETTERS = [
     { id: '01alif', char: 'أ' }, { id: '02ba', char: 'ب' }, { id: '03ta', char: 'ت' },
     { id: '04tha', char: 'ث' }, { id: '05jeem', char: 'ج' }, { id: '06haa', char: 'ح' },
@@ -87,16 +96,15 @@ const ALL_LETTERS = [
     { id: '28ya', char: 'ي' }
 ];
 
-// --- (تم التعديل) هيكل اللوحة (81 خلية) ---
-const T = 'transparent'; // خلية شفافة
-const G = 'default';     // خلية لعب رمادية
-const R = 'red';         // خلية موصل أحمر
-const P = 'purple';      // خلية موصل بنفسجي
-// (تم حذف D - الزوايا الداكنة)
+// --- هيكل اللوحة (81 خلية) ---
+const T = 'transparent'; 
+const G = 'default';     
+const R = 'red';         
+const P = 'purple';      
 
 const BOARD_LAYOUT = [
     [T, T, T, T, T, T, T, T, T], // صف 0 (شفاف)
-    [T, T, R, R, R, R, R, R, T], // صف 1: (1T, 6R, 2T) - حسب طلبك
+    [T, T, R, R, R, R, R, R, T], // صف 1: (1T, 6R, 2T)
     [T, P, G, G, G, G, G, P, T], // صف 2: (1T, 1P, 5G, 1P, 1T)
     [T, P, G, G, G, G, G, P, T], // صف 3
     [T, P, G, G, G, G, G, P, T], // صف 4
@@ -136,32 +144,36 @@ function handleSettingClick(event) {
     const settingType = clickedButton.dataset.setting;
     const settingValue = clickedButton.dataset.value;
 
-    // 1. تحديث كائن الإعدادات
     gameSettings[settingType] = settingValue;
     console.log('الإعدادات المحدثة:', gameSettings);
 
-    // 2. تحديث الواجهة (إزالة 'active' من الزر القديم وإضافته للجديد)
     const buttonsInGroup = document.querySelectorAll(`.setting-button[data-setting="${settingType}"]`);
     buttonsInGroup.forEach(btn => btn.classList.remove('active'));
     clickedButton.classList.add('active');
 
-    // (جديد) إظهار/إخفاء حقول الأسماء
+    // (جديد) إظهار/إخفاء لوحات إدخال الأسماء
     if (settingType === 'teams') {
-        if (settingValue === '2p' || settingValue === 'full') {
-            teamNameInputs.classList.remove('hidden');
-        } 
-        // (إذا أضفت خيار "لاعب واحد" مستقبلاً، يمكنك إخفاؤها)
-        // else {
-        //     teamNameInputs.classList.add('hidden');
-        // }
+        if (settingValue === 'individual') {
+            individualSettingsPanel.classList.remove('hidden');
+            teamSettingsPanel.classList.add('hidden');
+        } else if (settingValue === 'team') {
+            individualSettingsPanel.classList.add('hidden');
+            teamSettingsPanel.classList.remove('hidden');
+        }
     }
 }
 
 /** 4. (تم التعديل) وظيفة بدء اللعبة */
 function startGame() {
-    // 1. حفظ الإعدادات
-    gameSettings.team1Name = team1NameInput.value || 'الفريق البنفسجي';
-    gameSettings.team2Name = team2NameInput.value || 'الفريق الأحمر';
+    // 1. حفظ الإعدادات بناءً على اللوحة النشطة
+    if (gameSettings.teams === 'individual') {
+        gameSettings.team1Name = player1NameInput.value || 'اللاعب 1';
+        gameSettings.team2Name = player2NameInput.value || 'اللاعب 2';
+    } else {
+        gameSettings.team1Name = team1NameInput.value || 'الفريق البنفسجي';
+        gameSettings.team2Name = team2NameInput.value || 'الفريق الأحمر';
+        // (مستقبلاً: يمكن حفظ أسماء الأعضاء هنا)
+    }
 
     // 2. تحديث الواجهة
     mainMenuScreen.classList.remove('active');
@@ -188,7 +200,7 @@ function startNewRound() {
     TurnManager.startGame(); 
 }
 
-/** 6. (تم التعديل) بناء لوحة اللعب بالخلايا الشفافة (81 خلية) */
+/** 6. بناء لوحة اللعب بالخلايا الشفافة (81 خلية) */
 function initializeGameBoard() {
     gameBoardContainer.innerHTML = '';
     const shuffledLetters = shuffleArray(ALL_LETTERS);
@@ -206,14 +218,13 @@ function initializeGameBoard() {
             cell.dataset.col = c;
 
             switch(cellType) {
-                // (تم حذف case D)
-                case R: // 'red'
+                case R:
                     cell.classList.add('hex-cell-red');
                     break;
-                case P: // 'purple'
+                case P:
                     cell.classList.add('hex-cell-purple');
                     break;
-                case G: // 'default'
+                case G:
                     cell.classList.add('hex-cell-default','playable');
                     
                     if (letterIndex < gameLetters.length) {
@@ -228,7 +239,7 @@ function initializeGameBoard() {
                     
                     cell.addEventListener('click', handleCellClick);
                     break;
-                case T: // (جديد) 'transparent'
+                case T:
                     cell.classList.add('hex-cell-transparent');
                     break;
             }
@@ -239,7 +250,7 @@ function initializeGameBoard() {
 }
 
 
-/** 7. (تم التعديل) معالجة النقر على الخلية */
+/** 7. معالجة النقر على الخلية */
 async function handleCellClick(event) {
     if (!gameActive) return;
 
@@ -259,7 +270,6 @@ async function handleCellClick(event) {
         turnsControls.classList.add('hidden');
     }
     
-    // إخفاء قسم الجواب دائماً في البداية
     answerRevealSection.style.display = 'none';
 
     if (question) {
@@ -274,10 +284,7 @@ async function handleCellClick(event) {
         questionModalOverlay.style.display = 'flex';
     }
 
-    // (جديد) بدء المؤقت إذا كان مفعلاً
-    // if (gameSettings.timer !== 'off') {
-    //     startTimer(parseInt(gameSettings.timer));
-    // }
+    // (لم يتم تفعيل المؤقت بعد)
 }
 
 /** 8. جلب سؤال لحرف معين */
@@ -314,10 +321,9 @@ function showAnswer() {
     answerRevealSection.style.display = 'block';
 }
 
-/** 10. (تم التعديل) معالجة نتيجة السؤال */
+/** 10. معالجة نتيجة السؤال */
 function handleQuestionResult(result) {
-    // (جديد) إيقاف المؤقت
-    // stopTimer();
+    // (لم يتم تفعيل المؤقت بعد)
     
     questionModalOverlay.style.display = 'none';
 
@@ -328,25 +334,21 @@ function handleQuestionResult(result) {
 
     let teamColor = null;
 
-    // (جديد) تحديد اللون بناءً على النتيجة
     if (result === 'purple') {
         teamColor = 'purple';
     } else if (result === 'red') {
         teamColor = 'red';
     } else if (result === 'turn_correct') {
-        // تحديد لون اللاعب صاحب الدور الحالي
         teamColor = TurnManager.getCurrentPlayer(); 
     }
-    // (إذا كانت النتيجة 'skip' أو 'turn_skip'، يبقى teamColor = null)
 
     if (teamColor) {
         currentClickedCell.classList.remove('playable','hex-cell-default');
         currentClickedCell.classList.add(`hex-cell-${teamColor}-owned`);
         
-        // (تأكيد منطق الفوز)
         if (checkWinCondition(teamColor)) {
             handleGameWin(teamColor);
-            return; // توقف، لا تنقل الدور
+            return; 
         }
     }
 
@@ -360,13 +362,13 @@ function getCell(r,c) {
     return document.querySelector(`.hex-cell[data-row="${r}"][data-col="${c}"]`);
 }
 
-/** 12. (تم التعديل) جلب الجيران (لتوجيه مدبب الرأس 9x9) */
+/** 12. جلب الجيران (لتوجيه مدبب الرأس 9x9) */
 function getNeighbors(r, c) {
     r = parseInt(r);
     c = parseInt(c);
     
     let potentialNeighbors = [];
-    const isOddRow = r % 2 !== 0; // نعتمد على الصف الفردي/الزوجي
+    const isOddRow = r % 2 !== 0; 
 
     if (isOddRow) { // صف فردي (مزاح لليمين)
         potentialNeighbors = [
@@ -388,17 +390,15 @@ function getNeighbors(r, c) {
         ];
     }
 
-    // (الإصلاح الحاسم)
-    // فلترة الجيران بناءً على هيكل اللوحة الفعلي (81 خلية)
     return potentialNeighbors.filter(([nr, nc]) => {
         return BOARD_LAYOUT[nr] && 
                BOARD_LAYOUT[nr][nc] !== undefined &&
-               BOARD_LAYOUT[nr][nc] !== T; // تجاهل الخلايا الشفافة
+               BOARD_LAYOUT[nr][nc] !== T; 
     });
 }
 
 
-/** 13. (تم التعديل) التحقق من الفوز (بناءً على إحداثيات 81 خلية) */
+/** 13. التحقق من الفوز (بناءً على إحداثيات 81 خلية) */
 function checkWinCondition(teamColor) {
     const visited = new Set();
     const queue = [];
@@ -429,9 +429,8 @@ function checkWinCondition(teamColor) {
         const neighbors = getNeighbors(r,c);
         
         for(const [nr,nc] of neighbors){
-            // التحقق من الوصول للطرف الآخر
-            if(teamColor==='red' && nr===7) return true; // الوصول للصف 7
-            if(teamColor==='purple' && nc===7) return true; // الوصول للعمود 7
+            if(teamColor==='red' && nr===7) return true; 
+            if(teamColor==='purple' && nc===7) return true; 
             
             const neighborCell = getCell(nr,nc);
             if(neighborCell && !visited.has(`${nr},${nc}`) && 
@@ -463,21 +462,19 @@ function updateScoreboard(){
     redScoreDisplay.textContent = scores.red;
 }
 
-// --- (جديد) وظائف الميزات الإضافية ---
+// --- وظائف الميزات الإضافية ---
 
-/** 16. (جديد) الخروج للقائمة الرئيسية */
+/** 16. الخروج للقائمة الرئيسية */
 function exitToMenu() {
     gameScreen.classList.remove('active');
     mainMenuScreen.classList.add('active');
-    // (جديد) إيقاف المؤقت إذا كان يعمل
     // stopTimer();
 }
 
-/** 17. (جديد) تبديل الوضع (فاتح/غامق) */
+/** 17. تبديل الوضع (فاتح/غامق) */
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     document.body.classList.toggle('light-mode');
-    // (اختياري) تغيير نص الزر
     const button = document.getElementById('toggle-theme-button');
     if (document.body.classList.contains('dark-mode')) {
         button.textContent = 'تبديل الوضع (فاتح)';
@@ -486,48 +483,46 @@ function toggleTheme() {
     }
 }
 
-/** 18. (جديد) إظهار التعليمات */
+/** 18. إظهار التعليمات */
 function showInstructions() {
     instructionsModalOverlay.style.display = 'flex';
 }
 
-/** 19. (جديد) إخفاء التعليمات */
+/** 19. إخفاء التعليمات */
 function hideInstructions() {
     instructionsModalOverlay.style.display = 'none';
 }
 
-/** 20. (جديد) إخفاء رسالة تدوير الجهاز */
+/** 20. إخفاء رسالة تدوير الجهاز */
 function hideRotateMessage() {
     rotateOverlay.style.display = 'none';
 }
 
-/** 21. (جديد) التحقق من جهاز اللمس */
+/** 21. التحقق من جهاز اللمس */
 function checkDevice() {
     const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     
     if (!isTouch) {
-        // إذا كان الجهاز ليس لابتوب (لا يدعم اللمس)
-        // قم بإخفاء رسالة التدوير بشكل دائم
         rotateOverlay.style.display = 'none';
     }
 }
 
 // --- (تم التعديل) ربط الأحداث ---
-document.addEventListener('DOMContentLoaded', checkDevice); // (جديد)
+document.addEventListener('DOMContentLoaded', checkDevice); 
 
 settingButtons.forEach(button=>{ button.addEventListener('click', handleSettingClick); });
 startGameButton.addEventListener('click', startGame);
 nextRoundButton.addEventListener('click', startNewRound);
-instructionsButton.addEventListener('click', showInstructions); // (جديد)
-closeInstructionsButton.addEventListener('click', hideInstructions); // (جديد)
+instructionsButton.addEventListener('click', showInstructions); 
+closeInstructionsButton.addEventListener('click', hideInstructions); 
 
-exitGameButton.addEventListener('click', exitToMenu); // (جديد)
-toggleThemeButton.addEventListener('click', toggleTheme); // (جديد)
-closeRotateOverlay.addEventListener('click', hideRotateMessage); // (جديد)
+exitGameButton.addEventListener('click', exitToMenu); 
+toggleThemeButton.addEventListener('click', toggleTheme); 
+closeRotateOverlay.addEventListener('click', hideRotateMessage); 
 
 showAnswerButton.addEventListener('click', showAnswer);
 teamPurpleWinButton.addEventListener('click', ()=>handleQuestionResult('purple'));
 teamRedWinButton.addEventListener('click', ()=>handleQuestionResult('red'));
-competitiveSkipButton.addEventListener('click', ()=>handleQuestionResult('skip')); // (تعديل ID)
-turnCorrectButton.addEventListener('click', ()=>handleQuestionResult('turn_correct')); // (جديد)
-turnSkipButton.addEventListener('click', ()=>handleQuestionResult('turn_skip')); // (جديد)
+competitiveSkipButton.addEventListener('click', ()=>handleQuestionResult('skip')); 
+turnCorrectButton.addEventListener('click', ()=>handleQuestionResult('turn_correct')); 
+turnSkipButton.addEventListener('click', ()=>handleQuestionResult('turn_skip'));
