@@ -65,7 +65,6 @@ body.light-mode {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* (جديد) إضافة 'overflow' للسماح بالتمرير في شاشة الإعدادات إذا أصبحت طويلة */
     overflow-y: auto;
 }
 .screen.active {
@@ -79,34 +78,33 @@ body.light-mode {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 30px;
+    padding: 30px; /* (تصغير) */
     
-    /* (تم التعديل) تصميم زجاجي */
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     border: 1px solid var(--color-yellow);
     
-    max-width: 400px;
+    max-width: 350px; /* (تصغير) */
     width: 90%;
 }
 .login-logo {
-    width: 150px;
+    width: 130px; /* (تصغير) */
     margin-bottom: 20px;
 }
 .login-container label {
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* (تصغير) */
     margin-bottom: 10px;
     color: var(--color-text-dark);
 }
 .login-container input {
     font-family: var(--font-primary);
-    padding: 12px;
+    padding: 10px; /* (تصغير) */
     border: 2px solid var(--color-grey);
     border-radius: 8px;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem; /* (تصغير) */
     margin-bottom: 20px;
     direction: ltr;
     width: 80%;
@@ -114,9 +112,9 @@ body.light-mode {
     color: #333;
 }
 .login-container button {
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* (تصغير) */
     font-weight: bold;
-    padding: 12px 30px;
+    padding: 10px 30px; /* (تصغير) */
     border: none;
     border-radius: 8px;
     background-color: var(--color-yellow);
@@ -166,7 +164,6 @@ body.light-mode {
     text-align: center;
     font-size: 1.5rem;
 }
-/* (جديد) زر الإغلاق لرسالة التدوير */
 #close-rotate-overlay {
     position: absolute;
     top: 20px;
@@ -191,53 +188,63 @@ body.light-mode {
 /* ================================
     6. القائمة الرئيسية (Main Menu) - (تم التعديل بالكامل)
 ================================ */
-/* (جديد) الحاوية الزجاجية */
 .settings-container {
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* (تعديل) لجعل العناصر الداخلية تمتد */
-    padding: 30px;
+    align-items: stretch;
+    padding: 20px 30px; /* (تصغير) */
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     border: 1px solid var(--color-yellow);
-    max-width: 800px; /* (تعديل) زيادة العرض ليستوعب التصميم الجديد */
+    max-width: 700px; /* (تصغير) */
     width: 90%;
-    /* (جديد) إضافة هامش لضمان عدم الالتصاق بأعلى الشاشة */
     margin: 20px 0; 
 }
 
 .settings-container h2 {
-    font-size: 2.5rem;
+    font-size: 2rem; /* (تصغير) */
     margin-top: 0;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     border-bottom: 3px solid var(--color-yellow);
-    text-align: center; /* (جديد) */
+    text-align: center;
 }
+
+/* (جديد) تصميم الشبكة بعمودين */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    width: 100%;
+}
+.settings-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .setting-group {
-    margin-bottom: 20px;
+    margin-bottom: 0; /* (إلغاء) */
     width: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* (جديد) لضمان عدم التصاق الأزرار في الشاشات الصغيرة */
-    flex-wrap: wrap; 
+    /* (تعديل) جعل العناوين والأزرار عمودية */
+    flex-direction: column; 
+    align-items: flex-start;
 }
 .setting-group h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem; /* (تصغير) */
     margin: 0;
-    margin-bottom: 10px; /* (جديد) إضافة هامش أسفل العنوان */
+    margin-bottom: 10px;
 }
-/* (جديد) حاوية الأزرار */
 .button-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px; /* (تصغير) */
 }
 .setting-button {
-    font-size: 1.1rem;
-    padding: 10px 20px;
-    margin: 0; /* (إلغاء الهامش القديم) */
+    font-size: 1rem; /* (تصغير) */
+    padding: 8px 15px; /* (تصغير) */
+    margin: 0;
     border: 2px solid var(--color-grey);
     background-color: transparent;
     color: var(--color-grey);
@@ -249,7 +256,7 @@ body.light-mode {
     background-color: var(--color-yellow);
     color: var(--color-dark-bg);
     border-color: var(--color-yellow);
-    transform: scale(1.05); /* (تعديل) */
+    transform: scale(1.05);
 }
 
 /* (جديد) لوحة إعدادات الفرق */
@@ -265,10 +272,10 @@ body.light-mode {
     margin: 0 0 15px 0;
     text-align: center;
 }
-/* (جديد) تقسيم الأعمدة للفرق */
+/* (جديد) تصميم "فريق" بعمود واحد الآن */
 .team-columns {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* (تعديل) */
     gap: 20px;
     width: 100%;
 }
@@ -296,28 +303,58 @@ body.light-mode {
     border-radius: 8px;
     background: rgba(255,255,255,0.9);
     color: #333;
-    width: 95%; /* (تعديل) لضمان عدم الخروج عن الحاوية */
+    width: 95%; 
 }
 .input-group textarea {
-    resize: vertical; /* السماح بالتكبير العمودي فقط */
+    display: none; /* (إخفاء الـ textarea القديم) */
 }
 
+/* (جديد) تصميم "+ إضافة عضو" */
+.members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.members-list input {
+    width: 90% !important;
+}
+.add-member-button {
+    font-family: var(--font-primary);
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--color-grey);
+    color: var(--color-dark-bg);
+    cursor: pointer;
+    width: 100px;
+    margin-top: 5px;
+}
 
+/* (جديد) حاوية الأزرار السفلية */
+.footer-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    border-top: 1px solid var(--color-grey);
+    margin-top: 20px;
+    padding-top: 20px;
+}
 .start-button {
     font-size: 1.5rem;
     font-weight: bold;
     padding: 15px 40px;
-    margin-top: 20px;
+    margin-top: 0; /* (إلغاء) */
     border: none;
     border-radius: 10px;
     background-color: var(--color-purple);
     color: white;
     cursor: pointer;
     transition: transform 0.2s ease;
-    align-self: center; /* (جديد) توسيط الزر */
+    align-self: center;
 }
 .start-button:hover { transform: scale(1.05); }
-
 #instructions-button {
     background: transparent;
     border: none;
@@ -326,7 +363,7 @@ body.light-mode {
     font-size: 1rem;
     margin-top: 15px;
     cursor: pointer;
-    align-self: center; /* (جديد) توسيط الزر */
+    align-self: center;
 }
 
 /* ================================
@@ -334,7 +371,7 @@ body.light-mode {
 ================================ */
 #game-board-container {
     display: flex;
-    flex-direction: column; /* نرتب الصفوف عمودياً */
+    flex-direction: column; 
     justify-content: center;
     align-items: center; 
     margin-top: -30px; 
@@ -373,8 +410,6 @@ body.light-mode {
     filter: brightness(1.2);
     cursor: pointer;
 }
-/* (تم حذف .hex-cell-selected لأنه لم يعد موجوداً في JS) */
-
 
 /* ================================
     8. هيدر اللعبة (Scoreboards & Logo)
@@ -405,19 +440,20 @@ body.light-mode {
 .scoreboard-container.right { text-align: right; }
 
 .team-name {
-    font-size: 1.7rem; 
+    font-size: 0.9rem; /* (تصغير للنصف) */
     font-weight: bold;
+    margin-bottom: 5px; /* (إضافة هامش) */
 }
 .score {
-    font-size: 2.8rem; 
+    font-size: 1.5rem; /* (تصغير للنصف) */
     font-weight: bold;
     color: var(--color-yellow);
 }
 
-.game-logo { width: 120px; }
+.game-logo { width: 150px; } /* (تكبير) */
 
 .turn-indicator {
-    width: 50px; height:50px;
+    width: 35px; height:35px; /* (تصغير) */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -454,7 +490,29 @@ body.light-mode {
     max-width: 600px;
     text-align: center;
     box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    position: relative; /* (جديد) لـ المؤقت */
 }
+
+/* (جديد) تنسيق المؤقت */
+#question-timer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-yellow);
+    color: var(--color-dark-bg);
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: none; /* (مخفي افتراضياً) */
+    align-items: center;
+    justify-content: center;
+    border: 4px solid var(--color-light-bg);
+}
+
 #question-text { font-size:1.8rem; margin-bottom:25px; }
 #show-answer-button {
     font-size:1.2rem;
@@ -493,14 +551,12 @@ body.light-mode {
     cursor:pointer;
 }
 
-/* (جديد) تنسيق الاسم داخل الزر */
 .team-name-in-button {
     font-family: var(--font-primary);
     font-size: 1.1rem;
     font-weight: bold;
     color: white;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    /* (جديد) السماح بظهور الاسم حتى لو كان طويلاً */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -510,16 +566,15 @@ body.light-mode {
 #team-purple-win-button { background-image:url('assets/images/ui.purple.team.png'); }
 #team-red-win-button { background-image:url('assets/images/ui.red.team.png'); }
 
-/* (تم التعديل) زر التخطي التنافسي */
 #competitive-skip-button {
     background-image: url('assets/images/ui.button.skip.png');
-    background-size: 100% 100%; /* (تعديل) */
+    background-size: 100% 100%; 
     background-repeat: no-repeat;
     background-position: center;
     background-color: transparent;
     border: none;
-    width: 200px; /* (تعديل) */
-    height: 50px; /* (تعديل) */
+    width: 200px; 
+    height: 50px; 
     margin-top: 10px;
     cursor: pointer;
     color: white;
@@ -528,7 +583,6 @@ body.light-mode {
     font-weight: bold;
 }
 
-/* (جديد) أزرار وضع الأدوار */
 #turn-correct-button, #turn-skip-button {
     font-family: var(--font-primary);
     font-size: 1.1rem;
@@ -538,14 +592,14 @@ body.light-mode {
     border-radius: 8px;
     padding: 10px 20px;
     cursor: pointer;
-    width: 200px; /* (تعديل) */
-    height: 50px; /* (تعديل) */
+    width: 200px; 
+    height: 50px; 
 }
 #turn-correct-button {
     background-color: #27ae60; /* أخضر */
 }
 #turn-skip-button {
-    background-image: url('assets/images/ui.button.skip.png'); /* (تعديل) */
+    background-image: url('assets/images/ui.button.skip.png'); 
     background-size: 100% 100%;
     background-color: transparent;
 }
@@ -650,7 +704,7 @@ body.light-mode {
 }
 
 /* ================================
-    15. (جديد) نافذة التعليمات
+    15. نافذة التعليمات
 ================================ */
 #instructions-modal-overlay {
     position: fixed;
@@ -670,7 +724,7 @@ body.light-mode {
     border-radius: 15px;
     width: 80%;
     max-width: 600px;
-    text-align: right; /* (للنص العربي) */
+    text-align: right; 
     box-shadow: 0 5px 20px rgba(0,0,0,0.4);
 }
 #instructions-modal-overlay .modal-content h3 {
@@ -691,4 +745,56 @@ body.light-mode {
     color: var(--color-dark-bg);
     cursor: pointer;
     margin-top: 20px;
+}
+
+/* ================================
+    16. (جديد) نافذة تأكيد الخروج
+================================ */
+.modal-overlay-small {
+    position: fixed;
+    top:0; left:0;
+    width:100vw; height:100vh;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000; /* أعلى من نافذة السؤال */
+    backdrop-filter: blur(5px);
+}
+.modal-content-small {
+    background-color: var(--color-light-bg);
+    color: var(--color-dark-bg);
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+.modal-content-small h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: var(--color-red);
+}
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+.modal-buttons button {
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#exit-confirm-yes {
+    background-color: var(--color-red);
+    color: white;
+}
+#exit-confirm-no {
+    background-color: var(--color-grey);
+    color: var(--color-dark-bg);
 }
