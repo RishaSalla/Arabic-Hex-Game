@@ -1,7 +1,7 @@
 // --- استيراد مدير الأدوار ---
 import { TurnManager } from './turn_manager.js';
 
-// --- (تم التعديل) العناصر (Elements) ---
+// --- (تم التعديل بالكامل) العناصر (Elements) ---
 const mainMenuScreen = document.getElementById('main-menu-screen');
 const gameScreen = document.getElementById('game-screen');
 const gameBoardContainer = document.getElementById('game-board-container');
@@ -13,18 +13,21 @@ const instructionsButton = document.getElementById('instructions-button');
 const instructionsModalOverlay = document.getElementById('instructions-modal-overlay');
 const closeInstructionsButton = document.getElementById('close-instructions-button');
 
-// (جديد) لوحات إعدادات الفرق
+// لوحات إعدادات الفرق
 const individualSettingsPanel = document.getElementById('players-individual-settings');
 const teamSettingsPanel = document.getElementById('players-team-settings');
 
-// (جديد) حقول إدخال "فردي"
+// حقول "فردي"
 const player1NameInput = document.getElementById('player-1-name-input');
 const player2NameInput = document.getElementById('player-2-name-input');
 
-// (جديد) حقول إدخال "فريق"
-const team1NameInput = document.getElementById('team-1-name-input');
-const team2NameInput = document.getElementById('team-2-name-input');
-// (ملاحظة: حقول أسماء الأعضاء لا نحتاج لجلبها الآن إلا إذا أردنا عرضها)
+// حقول "فريق"
+const team1NameInput = document.getElementById('team-1-name-input-team');
+const team2NameInput = document.getElementById('team-2-name-input-team');
+const addTeam1MemberButton = document.getElementById('add-team-1-member-button');
+const addTeam2MemberButton = document.getElementById('add-team-2-member-button');
+const team1MembersList = document.getElementById('team-1-members-list');
+const team2MembersList = document.getElementById('team-2-members-list');
 
 // عناصر شاشة اللعبة
 const rotateOverlay = document.getElementById('rotate-device-overlay');
@@ -34,6 +37,7 @@ const toggleThemeButton = document.getElementById('toggle-theme-button');
 
 // عناصر نافذة السؤال
 const questionModalOverlay = document.getElementById('question-modal-overlay');
+const questionTimerDisplay = document.getElementById('question-timer');
 const questionText = document.getElementById('question-text');
 const showAnswerButton = document.getElementById('show-answer-button');
 const answerRevealSection = document.getElementById('answer-reveal-section');
@@ -56,7 +60,6 @@ const redScoreboardName = document.querySelector('#team-red-scoreboard .team-nam
 const purpleButtonName = document.querySelector('#team-purple-win-button .team-name-in-button');
 const redButtonName = document.querySelector('#team-red-win-button .team-name-in-button');
 
-
 // عناصر شاشة الفوز
 const roundWinOverlay = document.getElementById('round-win-overlay');
 const winMessage = document.getElementById('win-message');
@@ -64,13 +67,21 @@ const winScorePurple = document.getElementById('win-score-purple');
 const winScoreRed = document.getElementById('win-score-red');
 const nextRoundButton = document.getElementById('next-round-button');
 
+// (جديد) عناصر نافذة تأكيد الخروج
+const exitConfirmModal = document.getElementById('exit-confirm-modal');
+const exitConfirmYes = document.getElementById('exit-confirm-yes');
+const exitConfirmNo = document.getElementById('exit-confirm-no');
+
+
 // --- تصدير إعدادات اللعبة ---
 export const gameSettings = {
     mode: 'turns',
-    teams: 'individual', // (تم التعديل) القيمة الافتراضية
+    teams: 'individual',
     timer: 'off',
-    team1Name: 'اللاعب 1',
-    team2Name: 'اللاعب 2'
+    team1Name: 'اللاعب 1 (أحمر)',
+    team2Name: 'اللاعب 2 (بنفسجي)',
+    team1Members: [],
+    team2Members: []
 };
 
 // --- متغيرات حالة اللعبة ---
@@ -80,7 +91,8 @@ let currentClickedCell = null;
 let currentQuestion = null;
 let gameActive = true; 
 let scores = { purple: 0, red: 0 };
-// let timerInterval = null; 
+let timerInterval = null; // (جديد) للمؤقت
+let remainingTime = 0; // (جديد) للمؤقت
 
 // --- قائمة الحروف الأساسية ---
 const ALL_LETTERS = [
@@ -151,7 +163,7 @@ function handleSettingClick(event) {
     buttonsInGroup.forEach(btn => btn.classList.remove('active'));
     clickedButton.classList.add('active');
 
-    // (جديد) إظهار/إخفاء لوحات إدخال الأسماء
+    // إظهار/إخفاء لوحات إدخال الأسماء
     if (settingType === 'teams') {
         if (settingValue === 'individual') {
             individualSettingsPanel.classList.remove('hidden');
@@ -161,6 +173,7 @@ function handleSettingClick(event) {
             teamSettingsPanel.classList.remove('hidden');
         }
     }
+    validateSettings(); // (جديد) التحقق من تفعيل زر البدء
 }
 
 /** 4. (تم التعديل) وظيفة بدء اللعبة */
@@ -170,20 +183,22 @@ function startGame() {
         gameSettings.team1Name = player1NameInput.value || 'اللاعب 1';
         gameSettings.team2Name = player2NameInput.value || 'اللاعب 2';
     } else {
-        gameSettings.team1Name = team1NameInput.value || 'الفريق البنفسجي';
-        gameSettings.team2Name = team2NameInput.value || 'الفريق الأحمر';
-        // (مستقبلاً: يمكن حفظ أسماء الأعضاء هنا)
+        gameSettings.team1Name = team1NameInput.value || 'الفريق الأحمر';
+        gameSettings.team2Name = team2NameInput.value || 'الفريق البنفسجي';
+        // (جديد) حفظ أسماء الأعضاء
+        gameSettings.team1Members = Array.from(team1MembersList.querySelectorAll('input')).map(input => input.value);
+        gameSettings.team2Members = Array.from(team2MembersList.querySelectorAll('input')).map(input => input.value);
     }
 
     // 2. تحديث الواجهة
     mainMenuScreen.classList.remove('active');
     gameScreen.classList.add('active');
     
-    // 3. تحديث الأسماء في لوحة النتائج وفي نافذة السؤال
-    purpleScoreboardName.textContent = gameSettings.team1Name;
-    redScoreboardName.textContent = gameSettings.team2Name;
-    purpleButtonName.textContent = gameSettings.team1Name;
-    redButtonName.textContent = gameSettings.team2Name;
+    // 3. تحديث الأسماء (تم إصلاح الترتيب)
+    redScoreboardName.textContent = gameSettings.team1Name;
+    purpleScoreboardName.textContent = gameSettings.team2Name;
+    redButtonName.textContent = gameSettings.team1Name;
+    purpleButtonName.textContent = gameSettings.team2Name;
     
     // 4. بدء اللعبة
     scores = { purple: 0, red: 0 };
@@ -195,7 +210,7 @@ function startGame() {
 /** 5. بدء جولة جديدة */
 function startNewRound() {
     gameActive = true; 
-    roundWinOverlay.style.display = 'none'; 
+    roundWinOverlay.classList.add('hidden'); // (تم التعديل)
     initializeGameBoard(); 
     TurnManager.startGame(); 
 }
@@ -250,7 +265,7 @@ function initializeGameBoard() {
 }
 
 
-/** 7. معالجة النقر على الخلية */
+/** 7. (تم التعديل) معالجة النقر على الخلية */
 async function handleCellClick(event) {
     if (!gameActive) return;
 
@@ -261,7 +276,7 @@ async function handleCellClick(event) {
     currentClickedCell = clickedCell;
     const question = await getQuestionForLetter(letterId);
 
-    // (جديد) إظهار الأزرار الصحيحة بناءً على وضع اللعبة
+    // إظهار الأزرار الصحيحة بناءً على وضع اللعبة
     if (gameSettings.mode === 'turns') {
         competitiveControls.classList.add('hidden');
         turnsControls.classList.remove('hidden');
@@ -276,15 +291,20 @@ async function handleCellClick(event) {
         currentQuestion = question;
         questionText.textContent = question.question;
         answerText.textContent = question.answer;
-        questionModalOverlay.style.display = 'flex';
+        questionModalOverlay.classList.remove('hidden'); // (تم التعديل)
     } else {
         console.error(`لا يمكن جلب الأسئلة للملف: ${letterId}. هل الملف موجود؟`);
         questionText.textContent = 'عذراً، حدث خطأ في جلب السؤال.';
         answerText.textContent = '...';
-        questionModalOverlay.style.display = 'flex';
+        questionModalOverlay.classList.remove('hidden'); // (تم التعديل)
     }
 
-    // (لم يتم تفعيل المؤقت بعد)
+    // (جديد) بدء المؤقت
+    if (gameSettings.timer !== 'off') {
+        startTimer(parseInt(gameSettings.timer));
+    } else {
+        questionTimerDisplay.classList.add('hidden');
+    }
 }
 
 /** 8. جلب سؤال لحرف معين */
@@ -323,9 +343,9 @@ function showAnswer() {
 
 /** 10. معالجة نتيجة السؤال */
 function handleQuestionResult(result) {
-    // (لم يتم تفعيل المؤقت بعد)
+    stopTimer(); // (جديد) إيقاف المؤقت
     
-    questionModalOverlay.style.display = 'none';
+    questionModalOverlay.classList.add('hidden'); // (تم التعديل)
 
     if (currentQuestion) {
         usedQuestions[currentQuestion.id] = true;
@@ -346,6 +366,7 @@ function handleQuestionResult(result) {
         currentClickedCell.classList.remove('playable','hex-cell-default');
         currentClickedCell.classList.add(`hex-cell-${teamColor}-owned`);
         
+        // (تأكيد منطق الفوز)
         if (checkWinCondition(teamColor)) {
             handleGameWin(teamColor);
             return; 
@@ -370,23 +391,13 @@ function getNeighbors(r, c) {
     let potentialNeighbors = [];
     const isOddRow = r % 2 !== 0; 
 
-    if (isOddRow) { // صف فردي (مزاح لليمين)
+    if (isOddRow) {
         potentialNeighbors = [
-            [r, c - 1],     // يسار
-            [r, c + 1],     // يمين
-            [r - 1, c],     // أعلى-يسار
-            [r - 1, c + 1], // أعلى-يمين
-            [r + 1, c],     // أسفل-يسار
-            [r + 1, c + 1]  // أسفل-يمين
+            [r, c - 1], [r, c + 1], [r - 1, c], [r - 1, c + 1], [r + 1, c], [r + 1, c + 1]
         ];
-    } else { // صف زوجي
+    } else {
         potentialNeighbors = [
-            [r, c - 1],     // يسار
-            [r, c + 1],     // يمين
-            [r - 1, c - 1], // أعلى-يسار
-            [r - 1, c],     // أعلى-يمين
-            [r + 1, c - 1], // أسفل-يسار
-            [r + 1, c]      // أسفل-يمين
+            [r, c - 1], [r, c + 1], [r - 1, c - 1], [r - 1, c], [r + 1, c - 1], [r + 1, c]
         ];
     }
 
@@ -403,6 +414,7 @@ function checkWinCondition(teamColor) {
     const visited = new Set();
     const queue = [];
 
+    // (تم إصلاح الترتيب: الأحمر هو فريق 1، البنفسجي هو 2)
     if (teamColor==='red'){
         // البدء من الصف 1، الخلايا 1 إلى 6 (6 خلايا حمراء)
         for(let c=1; c<=6; c++){ 
@@ -448,27 +460,38 @@ function checkWinCondition(teamColor) {
 /** 14. معالجة الفوز بالجولة */
 function handleGameWin(teamColor){
     gameActive=false;
+    stopTimer(); // (جديد) إيقاف المؤقت عند الفوز
+    
+    // (تم إصلاح الترتيب)
     scores[teamColor]++;
     updateScoreboard();
-    winMessage.textContent = (teamColor==='red')? `${gameSettings.team2Name} فاز بالجولة!` : `${gameSettings.team1Name} فاز بالجولة!`;
+    winMessage.textContent = (teamColor==='red')? `${gameSettings.team1Name} فاز بالجولة!` : `${gameSettings.team2Name} فاز بالجولة!`;
     winScorePurple.textContent = scores.purple;
     winScoreRed.textContent = scores.red;
-    roundWinOverlay.style.display='flex';
+    roundWinOverlay.classList.remove('hidden'); // (تم التعديل)
 }
 
 /** 15. تحديث لوحة النتائج */
 function updateScoreboard(){
-    purpleScoreDisplay.textContent = scores.purple;
+    // (تم إصلاح الترتيب)
     redScoreDisplay.textContent = scores.red;
+    purpleScoreDisplay.textContent = scores.purple;
 }
 
 // --- وظائف الميزات الإضافية ---
 
-/** 16. الخروج للقائمة الرئيسية */
+/** 16. (تم التعديل) الخروج للقائمة الرئيسية */
 function exitToMenu() {
+    exitConfirmModal.classList.remove('hidden');
+}
+function confirmExit() {
+    exitConfirmModal.classList.add('hidden');
     gameScreen.classList.remove('active');
     mainMenuScreen.classList.add('active');
-    // stopTimer();
+    stopTimer();
+}
+function cancelExit() {
+    exitConfirmModal.classList.add('hidden');
 }
 
 /** 17. تبديل الوضع (فاتح/غامق) */
@@ -485,12 +508,12 @@ function toggleTheme() {
 
 /** 18. إظهار التعليمات */
 function showInstructions() {
-    instructionsModalOverlay.style.display = 'flex';
+    instructionsModalOverlay.classList.remove('hidden'); // (تم التعديل)
 }
 
 /** 19. إخفاء التعليمات */
 function hideInstructions() {
-    instructionsModalOverlay.style.display = 'none';
+    instructionsModalOverlay.classList.add('hidden'); // (تم التعديل)
 }
 
 /** 20. إخفاء رسالة تدوير الجهاز */
@@ -507,6 +530,64 @@ function checkDevice() {
     }
 }
 
+/** 22. (جديد) وظائف المؤقت */
+function startTimer(duration) {
+    remainingTime = duration;
+    questionTimerDisplay.textContent = duration < 10 ? `0${duration}` : duration;
+    questionTimerDisplay.classList.remove('hidden');
+    
+    timerInterval = setInterval(() => {
+        remainingTime--;
+        questionTimerDisplay.textContent = remainingTime < 10 ? `0${remainingTime}` : remainingTime;
+        
+        if (remainingTime <= 0) {
+            // (جديد) تخطي تلقائي عند انتهاء الوقت
+            handleQuestionResult('skip'); 
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    questionTimerDisplay.classList.add('hidden');
+}
+
+/** 23. (جديد) وظائف إضافة الأعضاء */
+function addMemberInput(team) {
+    const list = (team === 1) ? team1MembersList : team2MembersList;
+    
+    const container = document.createElement('div');
+    container.className = 'member-input-container';
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = `اسم العضو ${list.children.length + 1}`;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-member-button';
+    removeBtn.textContent = 'X';
+    removeBtn.onclick = () => container.remove();
+    
+    container.appendChild(input);
+    container.appendChild(removeBtn);
+    list.appendChild(container);
+}
+
+/** 24. (جديد) التحقق من تفعيل زر البدء */
+function validateSettings() {
+    let isValid = false;
+    if (gameSettings.teams === 'individual') {
+        // تفعيل إذا كتب في كلا الحقلين
+        isValid = player1NameInput.value.trim() !== '' && player2NameInput.value.trim() !== '';
+    } else {
+        // تفعيل إذا كتب اسمي الفريقين
+        isValid = team1NameInput.value.trim() !== '' && team2NameInput.value.trim() !== '';
+    }
+    startGameButton.disabled = !isValid;
+}
+
 // --- (تم التعديل) ربط الأحداث ---
 document.addEventListener('DOMContentLoaded', checkDevice); 
 
@@ -519,6 +600,23 @@ closeInstructionsButton.addEventListener('click', hideInstructions);
 exitGameButton.addEventListener('click', exitToMenu); 
 toggleThemeButton.addEventListener('click', toggleTheme); 
 closeRotateOverlay.addEventListener('click', hideRotateMessage); 
+
+// (جديد) ربط أزرار تأكيد الخروج
+exitConfirmYes.addEventListener('click', confirmExit);
+exitConfirmNo.addEventListener('click', cancelExit);
+
+// (جديد) ربط أزرار إضافة الأعضاء
+addTeam1MemberButton.addEventListener('click', () => addMemberInput(1));
+addTeam2MemberButton.addEventListener('click', () => addMemberInput(2));
+
+// (جديد) ربط حقول الإدخال للتحقق
+player1NameInput.addEventListener('input', validateSettings);
+player2NameInput.addEventListener('input', validateSettings);
+team1NameInput.addEventListener('input', validateSettings);
+team2NameInput.addEventListener('input', validateSettings);
+
+// (جديد) تشغيل التحقق أول مرة لتعطيل الزر
+validateSettings();
 
 showAnswerButton.addEventListener('click', showAnswer);
 teamPurpleWinButton.addEventListener('click', ()=>handleQuestionResult('purple'));
