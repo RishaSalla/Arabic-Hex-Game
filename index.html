@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HROF-GAME</title>
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body class="dark-mode"> 
 
@@ -60,11 +60,11 @@
                     <div id="players-individual-settings" class="team-setup-panel">
                         <h4>إعدادات اللاعبين</h4>
                         <div class="input-group">
-                            <label for="player-1-name-input">اسم اللاعب 1 (بنفسجي)</label>
+                            <label for="player-1-name-input">اسم اللاعب 1 (أحمر)</label>
                             <input type="text" id="player-1-name-input" placeholder="ادخل اسم اللاعب 1">
                         </div>
                         <div class="input-group">
-                            <label for="player-2-name-input">اسم اللاعب 2 (أحمر)</label>
+                            <label for="player-2-name-input">اسم اللاعب 2 (بنفسجي)</label>
                             <input type="text" id="player-2-name-input" placeholder="ادخل اسم اللاعب 2">
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                         <div class="team-columns">
                             <div class="team-column">
                                 <div class="input-group">
-                                    <label for="team-1-name-input">اسم الفريق 1 (بنفسجي)</label>
+                                    <label for="team-1-name-input-team">اسم الفريق 1 (أحمر)</label>
                                     <input type="text" id="team-1-name-input-team" placeholder="ادخل اسم الفريق 1">
                                 </div>
                                 <div class="input-group">
@@ -86,7 +86,7 @@
                             </div>
                             <div class="team-column">
                                 <div class="input-group">
-                                    <label for="team-2-name-input">اسم الفريق 2 (أحمر)</label>
+                                    <label for="team-2-name-input-team">اسم الفريق 2 (بنفسجي)</label>
                                     <input type="text" id="team-2-name-input-team" placeholder="ادخل اسم الفريق 2">
                                 </div>
                                 <div class="input-group">
@@ -107,11 +107,16 @@
             </div>
         </div>
 
-        <div id="instructions-modal-overlay">
+        <div id="instructions-modal-overlay" class="hidden">
             <div class="modal-content">
                 <h2>التعليمات</h2>
                 <h3>الهدف: صِل لتربح!</h3>
-                <p>...</p>
+                <p>الهدف هو بناء مسار متصل من خلايا فريقك. الفريق الأحمر يحاول التوصيل من الأعلى للأسفل، والفريق البنفسجي من اليمين لليسار.</p>
+                <h3>أنماط اللعب:</h3>
+                <ul>
+                    <li><strong>الأدوار:</strong> تحدٍ هادئ. السؤال موجه للفريق صاحب الدور.</li>
+                    <li><strong>التنافسي:</strong> سباق حماسي! الفريق الأسرع في الإجابة يمتلك الخلية.</li>
+                </ul>
                 <button id="close-instructions-button">فهمت!</button>
             </div>
         </div>
@@ -121,16 +126,16 @@
     <div id="game-screen" class="screen">
         
         <header class="game-header">
-            <div id="team-purple-scoreboard" class="scoreboard-container left">
-                <span class="team-name">الفريق البنفسجي</span>
-                <span class="score" id="purple-score">0</span>
+            <div id="team-red-scoreboard" class="scoreboard-container left">
+                <span class="team-name">الفريق الأحمر</span>
+                <span class="score" id="red-score">0</span>
             </div>
             <div id="turn-indicator-left" class="turn-indicator"></div>
             <img src="assets/images/logo.hrof.png" alt="HROF Logo" class="game-logo">
             <div id="turn-indicator-right" class="turn-indicator"></div>
-            <div id="team-red-scoreboard" class="scoreboard-container right">
-                <span class="team-name">الفريق الأحمر</span>
-                <span class="score" id="red-score">0</span>
+            <div id="team-purple-scoreboard" class="scoreboard-container right">
+                <span class="team-name">الفريق البنفسجي</span>
+                <span class="score" id="purple-score">0</span>
             </div>
         </header>
 
@@ -141,9 +146,9 @@
             <button id="toggle-theme-button">تبديل الوضع (فاتح)</button>
         </div>
 
-        <div id="question-modal-overlay">
+        <div id="question-modal-overlay" class="hidden">
             <div class="modal-content">
-                <div id="question-timer">00:30</div> 
+                <div id="question-timer" class="hidden">00:30</div> 
                 
                 <h3 id="question-text">نص السؤال سيظهر هنا...</h3>
                 <button id="show-answer-button">أظهر الإجابة</button>
@@ -154,11 +159,11 @@
                     <div id="competitive-controls">
                         <h4>من الذي حصل على الإجابة؟</h4>
                         <div class="team-choice-buttons">
-                            <button id="team-purple-win-button">
-                                <span class="team-name-in-button">الفريق البنفسجي</span>
-                            </button>
                             <button id="team-red-win-button">
                                 <span class="team-name-in-button">الفريق الأحمر</span>
+                            </button>
+                            <button id="team-purple-win-button">
+                                <span class="team-name-in-button">الفريق البنفسجي</span>
                             </button>
                         </div>
                         <button id="competitive-skip-button">تخطي السؤال</button>
@@ -175,7 +180,7 @@
             </div>
         </div>
 
-        <div id="round-win-overlay">
+        <div id="round-win-overlay" class="hidden">
             <div class="win-content">
                 <h2 id="win-message">الفريق الأحمر فاز بالجولة!</h2>
                 <div class="score-update" dir="ltr">
