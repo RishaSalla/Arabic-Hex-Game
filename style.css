@@ -21,13 +21,13 @@
     --hex-height: 104px; 
     
     /* (إصلاح التباعد) تداخل عمودي (75% من الارتفاع) */
-    --hex-vertical-overlap: -26px; /* (height * 0.25) بالسالب */
+    --hex-vertical-overlap: -22px; /* (height * 0.25) بالسالب */
     
     /* (إصلاح التباعد) إزاحة أفقية (50% من العرض) */
     --hex-horizontal-offset: 45px; /* (width * 0.5) */
     
     /* (إصلاح التباعد) تداخل أفقي (75% من العرض) */
-    --hex-horizontal-overlap: -22px; /* (width * 0.25) بالسالب */
+    --hex-horizontal-overlap: -8px; /* (width * 0.25) بالسالب */
 }
 
 body {
@@ -228,7 +228,7 @@ body.light-mode {
 .hex-row {
     display: flex;
     flex-direction: row;
-    justify-content: center; 
+    /* (تم حذف 'justify-content: center;') */
     margin-top: var(--hex-vertical-overlap); /* (القيمة التي ستضبطها أنت) */
 }
 
@@ -272,7 +272,6 @@ body.light-mode {
     filter: brightness(1.2);
     cursor: pointer;
 }
-
 /* ================================
     8. هيدر اللعبة (Scoreboards & Logo)
 ================================ */
