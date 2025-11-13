@@ -339,58 +339,80 @@ function getCell(r,c){
 }
 
 function getNeighbors(r,c){
-    r=parseInt(r); c=parseInt(c);
-    const isOdd = r%2!==0;
-    let potential=[];
-    if(isOdd){
-        potential=[[r,c-1],[r,c+1],[r-1,c],[r-1,c+1],[r+1,c],[r+1,c+1]];
-    } else{
-        potential=[[r,c-1],[r,c+1],[r-1,c-1],[r-1,c],[r+1,c-1],[r+1,c]];
-    }
-    return potential.filter(([nr,nc])=>{
-        return BOARD_LAYOUT[nr] && BOARD_LAYOUT[nr][nc]!==T && BOARD_LAYOUT[nr][nc]!==undefined;
-    });
+    r=parseInt(r); c=parseInt(c);
+    const isOdd = r%2!==0; 
+    let potential=[];
+    
+    // 🛠️ 1. عكس منطق الإزاحة ليتناسب مع البناء الفعلي (حل الاتصال المائل)
+    if(isOdd){ 
+        potential=[[r,c-1],[r,c+1],[r-1,c-1],[r-1,c],[r+1,c-1],[r+1,c]];
+    } else{ 
+        potential=[[r,c-1],[r,c+1],[r-1,c],[r-1,c+1],[r+1,c],[r+1,c+1]];
+    }
+    
+    // 🛠️ 2. الفلترة: السماح بالاتصال بالحدود الثابتة (R و P)
+    return potential.filter(([nr,nc])=>{
+        const numRows = BOARD_LAYOUT.length;
+        const numCols = BOARD_LAYOUT[0].length;
+        const cellType = BOARD_LAYOUT[nr] ? BOARD_LAYOUT[nr][nc] : undefined;
+
+        return (
+            nr >= 0 && nr < numRows && 
+            nc >= 0 && nc < numCols && 
+            cellType !== T
+        );
+    });
 }
 
 function checkWinCondition(teamColor){
-    const visited = new Set();
-    const queue = [];
+    const visited = new Set();
+    const queue = [];
 
-    if(teamColor==='red'){
-        for(let c=1;c<=6;c++){
-            const cell = getCell(1,c);
-            if(cell && cell.classList.contains('hex-cell-red-owned')){
-                queue.push([1,c]);
-                visited.add(`1,${c}`);
-            }
-        }
-    } else {
-        for(let r=2;r<=6;r++){
-            const cell = getCell(r,1);
-            if(cell && cell.classList.contains('hex-cell-purple-owned')){
-                queue.push([r,1]);
-                visited.add(`${r},1`);
-            }
-        }
-    }
+    // 🛠️ 3. تصحيح نقطة البداية (البحث من الخلايا القابلة للامتلاك: 2 و 6)
+    if(teamColor==='red'){
+        // 🟥 الأحمر (أعلى -> أسفل): يبدأ من الصف 2
+        for(let c=2;c<=6;c++){ 
+            const cell = getCell(2,c); // يبدأ من الصف 2 (أول صف لعب)
+            if(cell && cell.classList.contains('hex-cell-red-owned')){
+                queue.push([2,c]);
+                visited.add(`2,${c}`);
+            }
+        }
+    } else {
+        // 🟪 البنفسجي (يمين -> يسار): يبدأ من العمود 6 (أقصى يمين اللعب)
+        for(let r=2;r<=6;r++){ 
+            const cell = getCell(r,6); // يبدأ من العمود 6 (أقصى يمين اللعب)
+            if(cell && cell.classList.contains('hex-cell-purple-owned')){
+                queue.push([r,6]);
+                visited.add(`${r},6`);
+            }
+        }
+    }
 
-    while(queue.length>0){
-        const [r,c] = queue.shift();
-        const neighbors = getNeighbors(r,c);
-        for(const [nr,nc] of neighbors){
-            if(teamColor==='red' && nr===7) return true;
-            if(teamColor==='purple' && nc===7) return true;
+    // 2. البحث (BFS)
+    while(queue.length>0){
+        const [r,c] = queue.shift();
+        const neighbors = getNeighbors(r,c);
 
-            const neighborCell=getCell(nr,nc);
-            if(neighborCell && !visited.has(`${nr},${nc}`) &&
-               neighborCell.classList.contains(`hex-cell-${teamColor}-owned`)){
-                visited.add(`${nr},${nc}`);
-                queue.push([nr,nc]);
-            }
-        }
-    }
+        for(const [nr,nc] of neighbors){
+            // 🛠️ 4. شرط الفوز: التوصيل إلى الطرف المقابل
+            
+            // 🟥 الأحمر يفوز: إذا وصل إلى الصف 6 أو 7 (أو تجاوزه)
+            if(teamColor==='red' && (nr >= 6)) return true; 
+            
+            // 🟪 البنفسجي يفوز: إذا وصل إلى العمود 2 أو 1 (أو أقل)
+            if(teamColor==='purple' && (nc <= 2)) return true; 
+            
+            const neighborCell=getCell(nr,nc);
+            if(neighborCell && !visited.has(`${nr},${nc}`) &&
+               neighborCell.classList.contains(`hex-cell-${teamColor}-owned`)){
+                visited.add(`${nr},${nc}`);
+                queue.push([nr,nc]);
+            }
+        }
+    }
 
-    return false;
+    return false;
 }
 
 function handleGameWin(teamColor){
