@@ -346,13 +346,27 @@ function getNeighbors(r,c){
     r=parseInt(r); c=parseInt(c);
     const isOdd = r%2!==0;
     let potential=[];
-    if(isOdd){
+    
+    // منطق الإزاحة للخلايا المدببة (صحيح)
+    if(isOdd){ 
         potential=[[r,c-1],[r,c+1],[r-1,c],[r-1,c+1],[r+1,c],[r+1,c+1]];
     } else{
         potential=[[r,c-1],[r,c+1],[r-1,c-1],[r-1,c],[r+1,c-1],[r+1,c]];
     }
+    
+    // 🛑 التعديل الرئيسي: تبسيط الفلترة للسماح بالاتصال بالحدود الثابتة (R و P)
     return potential.filter(([nr,nc])=>{
-        return BOARD_LAYOUT[nr] && BOARD_LAYOUT[nr][nc]!==T && BOARD_LAYOUT[nr][nc]!==undefined;
+        const numRows = BOARD_LAYOUT.length;
+        const numCols = BOARD_LAYOUT[0].length;
+
+        return (
+            // 1. التأكد من أن الإحداثيات داخل نطاق المصفوفة (0-8)
+            nr >= 0 && nr < numRows && 
+            nc >= 0 && nc < numCols && 
+            
+            // 2. استبعاد الخلايا الشفافة (T) فقط
+            BOARD_LAYOUT[nr][nc] !== T
+        );
     });
 }
 
